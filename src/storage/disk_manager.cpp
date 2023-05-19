@@ -42,20 +42,51 @@ void DiskManager::WritePage(page_id_t logical_page_id, const char *page_data) {
 }
 
 page_id_t DiskManager::AllocatePage() {
-  ASSERT(false, "Not implemented yet.");
-  return INVALID_PAGE_ID;
+  std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
+  DiskFileMetaPage *disk_meta_page = reinterpret_cast<DiskFileMetaPage*>(meta_data_);
+  for(uint32_t i = 0; i < disk_meta_page->GetExtentNums(); i++) {
+    BitmapPage<PAGE_SIZE> bitmap_page;
+    ReadPhysicalPage(i, reinterpret_cast<char *>(&bitmap_page));
+    uint32_t page_offset;
+    if(bitmap_page.AllocatePage(page_offset)) {//allocated successfully
+      WritePhysicalPage(i, reinterpret_cast<const char *>(&bitmap_page));
+      return i * BITMAP_SIZE + page_offset;
+    }
+  }
+  //no free pages
+  char empty_page[PAGE_SIZE] = {0};
+  for(size_t i = 0; i < BITMAP_SIZE + 1; i++) {
+    WritePhysicalPage(disk_meta_page->GetExtentNums() * BITMAP_SIZE + 1, empty_page);
+  }
+  disk_meta_page->num_extents_++;
+  return (disk_meta_page->GetExtentNums() - 1) * BITMAP_SIZE;
 }
 
 void DiskManager::DeAllocatePage(page_id_t logical_page_id) {
-  ASSERT(false, "Not implemented yet.");
+  std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
+  BitmapPage<PAGE_SIZE> bitmap_page;
+  uint32_t extent_id = logical_page_id / BITMAP_SIZE;
+  uint32_t page_offset = logical_page_id % BITMAP_SIZE;
+  ReadPhysicalPage(extent_id, reinterpret_cast<char*>(&bitmap_page));
+  bitmap_page.DeAllocatePage(page_offset);
+  WritePage(extent_id, reinterpret_cast<const char *>(&bitmap_page));
 }
 
 bool DiskManager::IsPageFree(page_id_t logical_page_id) {
-  return false;
+  std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
+  BitmapPage<PAGE_SIZE> bitmap_page;
+  uint32_t extent_id = logical_page_id / BITMAP_SIZE;
+  uint32_t page_offset = logical_page_id % BITMAP_SIZE;
+  ReadPhysicalPage(extent_id, reinterpret_cast<char *>(&bitmap_page));
+
+  return bitmap_page.IsPageFree(page_offset);
 }
 
 page_id_t DiskManager::MapPageId(page_id_t logical_page_id) {
-  return 0;
+  std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
+  uint32_t extent_id = logical_page_id / BITMAP_SIZE;
+  uint32_t page_offset = logical_page_id % BITMAP_SIZE;
+  return extent_id * (BITMAP_SIZE + 1) + 1 + page_offset;
 }
 
 int DiskManager::GetFileSize(const std::string &file_name) {

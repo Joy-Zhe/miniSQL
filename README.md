@@ -53,4 +53,3 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 
 如果需要运行单个测试，例如，想要运行`lru_replacer_test.cpp`对应的测试文件，可以通过`make lru_replacer_test`
 命令进行构建。
-# miniSQL
