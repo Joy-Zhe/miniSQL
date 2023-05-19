@@ -33,13 +33,16 @@ TEST(DiskManagerTest, BitMapPageTest) {
   ASSERT_FALSE(bitmap->AllocatePage(ofs));
 }
 
-TEST(DiskManagerTest, DISABLED_FreePageAllocationTest) {
+TEST(DiskManagerTest, FreePageAllocationTest) {
   std::string db_name = "disk_test.db";
   DiskManager *disk_mgr = new DiskManager(db_name);
   int extent_nums = 2;
   for (uint32_t i = 0; i < DiskManager::BITMAP_SIZE * extent_nums; i++) {
     page_id_t page_id = disk_mgr->AllocatePage();
     DiskFileMetaPage *meta_page = reinterpret_cast<DiskFileMetaPage *>(disk_mgr->GetMetaData());
+//    if(i == 60000) {
+//      std::cout << 1 << std::endl;
+//    }
     EXPECT_EQ(i, page_id);
     EXPECT_EQ(i / DiskManager::BITMAP_SIZE + 1, meta_page->GetExtentNums());
     EXPECT_EQ(i + 1, meta_page->GetAllocatedPages());

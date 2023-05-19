@@ -44,31 +44,52 @@ void DiskManager::WritePage(page_id_t logical_page_id, const char *page_data) {
 page_id_t DiskManager::AllocatePage() {
   std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
   DiskFileMetaPage *disk_meta_page = reinterpret_cast<DiskFileMetaPage*>(meta_data_);
+  uint32_t *extent_used_page = disk_meta_page->extent_used_page_;
+  //try to fit in the free pages
   for(uint32_t i = 0; i < disk_meta_page->GetExtentNums(); i++) {
     BitmapPage<PAGE_SIZE> bitmap_page;
     ReadPhysicalPage(i, reinterpret_cast<char *>(&bitmap_page));
     uint32_t page_offset;
     if(bitmap_page.AllocatePage(page_offset)) {//allocated successfully
       WritePhysicalPage(i, reinterpret_cast<const char *>(&bitmap_page));
-      return i * BITMAP_SIZE + page_offset;
+//      disk_meta_page->num_extents_++;
+      disk_meta_page->num_allocated_pages_++;
+      extent_used_page[i]++;
+      return i * BITMAP_SIZE + extent_used_page[i] - 1;
     }
   }
   //no free pages
   char empty_page[PAGE_SIZE] = {0};
+  BitmapPage<PAGE_SIZE> bitmap_page;//new bitmap page
+  uint32_t page_offset;
+  bitmap_page.AllocatePage(page_offset); // Allocate the first page for bitmap
+  disk_meta_page->num_allocated_pages_++;
   for(size_t i = 0; i < BITMAP_SIZE + 1; i++) {
-    WritePhysicalPage(disk_meta_page->GetExtentNums() * BITMAP_SIZE + 1, empty_page);
+    if (i == 0) {
+      WritePhysicalPage(disk_meta_page->GetExtentNums() * (BITMAP_SIZE + 1) + i, reinterpret_cast<const char*>(&bitmap_page));
+    } else {
+      WritePhysicalPage(disk_meta_page->GetExtentNums() * (BITMAP_SIZE + 1) + i, empty_page);
+    }
   }
+//  disk_meta_page->num_allocated_pages_++;
   disk_meta_page->num_extents_++;
-  return (disk_meta_page->GetExtentNums() - 1) * BITMAP_SIZE;
+  extent_used_page[disk_meta_page->GetExtentNums() - 1]++;
+//  return (disk_meta_page->GetExtentNums()) * BITMAP_SIZE;
+  return (disk_meta_page->GetExtentNums() - 1) * BITMAP_SIZE + extent_used_page[disk_meta_page->GetExtentNums() - 1] - 1;
+
 }
 
 void DiskManager::DeAllocatePage(page_id_t logical_page_id) {
   std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
+  DiskFileMetaPage *disk_meta_page = reinterpret_cast<DiskFileMetaPage*>(meta_data_);
+  uint32_t *extent_used_page = disk_meta_page->extent_used_page_;
   BitmapPage<PAGE_SIZE> bitmap_page;
   uint32_t extent_id = logical_page_id / BITMAP_SIZE;
   uint32_t page_offset = logical_page_id % BITMAP_SIZE;
   ReadPhysicalPage(extent_id, reinterpret_cast<char*>(&bitmap_page));
   bitmap_page.DeAllocatePage(page_offset);
+  extent_used_page[extent_id]--;
+  disk_meta_page->num_allocated_pages_--;
   WritePage(extent_id, reinterpret_cast<const char *>(&bitmap_page));
 }
 
