@@ -5,6 +5,7 @@
 #include <mutex>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
 
 #include "buffer/replacer.h"
 #include "common/config.h"
@@ -37,6 +38,9 @@ public:
 
 private:
   // add your own private member variables here
+ size_t POOL_SIZE;
+ list<frame_id_t> lru_list_;
+ unordered_set<frame_id_t> find_frame;
 };
 
 #endif  // MINISQL_LRU_REPLACER_H
