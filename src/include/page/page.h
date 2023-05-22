@@ -56,6 +56,8 @@ public:
   /** Sets the page LSN. */
   inline void SetLSN(lsn_t lsn) { memcpy(GetData() + OFFSET_LSN, &lsn, sizeof(lsn_t)); }
 
+  /** The pin count of this page. */
+  int pin_count_ = 0;
 protected:
   static_assert(sizeof(page_id_t) == 4);
   static_assert(sizeof(lsn_t) == 4);
@@ -72,8 +74,8 @@ private:
   char data_[PAGE_SIZE]{};
   /** The ID of this page. */
   page_id_t page_id_ = INVALID_PAGE_ID;
-  /** The pin count of this page. */
-  int pin_count_ = 0;
+//  /** The pin count of this page. */
+//  int pin_count_ = 0;
   /** True if the page is dirty, i.e. it is different from its corresponding page on disk. */
   bool is_dirty_ = false;
   /** Page latch. */

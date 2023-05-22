@@ -22,21 +22,70 @@ BufferPoolManager::~BufferPoolManager() {
 Page *BufferPoolManager::FetchPage(page_id_t page_id) {
   // 1.     Search the page table for the requested page (P).
   // 1.1    If P exists, pin it and return it immediately.
+  if(page_table_.find(page_id) != page_table_.end()) {
+    replacer_->Pin(page_table_.find(page_id)->second);
+    pages_[page_table_.find(page_id)->second].pin_count_++;
+    return &pages_[page_table_.find(page_id)->second];
+  }
   // 1.2    If P does not exist, find a replacement page (R) from either the free list or the replacer.
   //        Note that pages are always found from the free list first.
+  frame_id_t R;
+  if(!free_list_.empty()) {
+    //free list not empty
+//    replacer_->Unpin(free_list_.back());
+    R = free_list_.back();
+    free_list_.pop_back();
+  } else {
+    //replacer is not empty
+    if(!replacer_->Victim(&R))
+      return nullptr;
+  }
   // 2.     If R is dirty, write it back to the disk.
+  if(pages_[R].is_dirty_) {
+    disk_manager_->WritePage(pages_[R].page_id_, pages_[R].data_);
+    pages_[R].is_dirty_ = false; //reset
+  }
   // 3.     Delete R from the page table and insert P.
+  page_table_.erase(pages_[R].page_id_);
   // 4.     Update P's metadata, read in the page content from disk, and then return a pointer to P.
-  return nullptr;
+  disk_manager_->ReadPage(page_id, pages_[R].data_);
+  return &pages_[R];
 }
 
 Page *BufferPoolManager::NewPage(page_id_t &page_id) {
   // 0.   Make sure you call AllocatePage!
+  page_id = AllocatePage();
   // 1.   If all the pages in the buffer pool are pinned, return nullptr.
+  if(free_list_.empty() && replacer_->Size() == 0) {
+    return nullptr;
+  }
   // 2.   Pick a victim page P from either the free list or the replacer. Always pick from the free list first.
+  frame_id_t P;
+  if(!free_list_.empty()) {
+    P = free_list_.back();
+    free_list_.pop_back();
+  } else {
+    if(!replacer_->Victim(&P)) {
+      return nullptr;
+    }
+  }
   // 3.   Update P's metadata, zero out memory and add P to the page table.
+  Page &R = pages_[P];
+  if(R.IsDirty()) {
+    disk_manager_->WritePage(R.GetPageId(), R.GetData());
+  }
   // 4.   Set the page ID output parameter. Return a pointer to P.
-  return nullptr;
+  page_table_.erase(R.GetPageId());
+  // Reset page metadata and zero out memory
+  R.page_id_ = page_id;
+  R.ResetMemory();
+  R.is_dirty_ = false;
+  R.pin_count_ = 1;
+  // Add new page table entry
+  page_table_.emplace(page_id, P);
+
+  // 4. Set the page ID output parameter. Return a pointer to P.
+  return &R;
 }
 
 bool BufferPoolManager::DeletePage(page_id_t page_id) {
