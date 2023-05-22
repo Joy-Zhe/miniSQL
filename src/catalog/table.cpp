@@ -1,5 +1,5 @@
 #include "catalog/table.h"
-
+//jy 5.22
 uint32_t TableMetadata::SerializeTo(char *buf) const {
   return 0;
 }
