@@ -53,8 +53,6 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
 }
 
 Page *BufferPoolManager::NewPage(page_id_t &page_id) {
-  // 0.   Make sure you call AllocatePage!
-  page_id = AllocatePage();
   // 1.   If all the pages in the buffer pool are pinned, return nullptr.
   if(free_list_.empty() && replacer_->Size() == 0) {
     return nullptr;
@@ -69,6 +67,8 @@ Page *BufferPoolManager::NewPage(page_id_t &page_id) {
       return nullptr;
     }
   }
+  // 0.   Make sure you call AllocatePage!
+      page_id = AllocatePage();
   // 3.   Update P's metadata, zero out memory and add P to the page table.
   Page &R = pages_[P];
   if(R.IsDirty()) {
@@ -83,26 +83,62 @@ Page *BufferPoolManager::NewPage(page_id_t &page_id) {
   R.pin_count_ = 1;
   // Add new page table entry
   page_table_.emplace(page_id, P);
-
+  pool_size_++;
   // 4. Set the page ID output parameter. Return a pointer to P.
   return &R;
 }
 
 bool BufferPoolManager::DeletePage(page_id_t page_id) {
-  // 0.   Make sure you call DeallocatePage!
   // 1.   Search the page table for the requested page (P).
-  // 1.   If P does not exist, return true.
-  // 2.   If P exists, but has a non-zero pin-count, return false. Someone is using the page.
+  if(page_table_.find(page_id) == page_table_.end()) {
+    // 1.   If P does not exist, return true.
+    return true;
+  } else {
+    // 2.   If P exists, but has a non-zero pin-count, return false. Someone is using the page.
+    if(pages_[page_table_.find(page_id)->second].GetPinCount() > 0) {
+      return false;
+    }
+  }
   // 3.   Otherwise, P can be deleted. Remove P from the page table, reset its metadata and return it to the free list.
-  return false;
+  page_table_.erase(page_id);
+  disk_manager_->ReadPage(page_id, pages_[page_table_.find(page_id)->second].GetData());
+  free_list_.push_back(page_table_.find(page_id)->second);
+  // 0.   Make sure you call DeallocatePage!
+  pool_size_--;
+  DeallocatePage(page_id);
+  return true;
 }
 
 bool BufferPoolManager::UnpinPage(page_id_t page_id, bool is_dirty) {
-  return false;
+  if(page_table_.find(page_id) == page_table_.end()) {
+    //page not found
+    return false;
+  }
+  if(pages_[page_table_.find(page_id)->second].GetPinCount() <= 0) {
+    //no more pin count to decrease
+    return false;
+  }
+  //update status, unpin the current page
+  pages_[page_table_.find(page_id)->second].pin_count_--;
+  pages_[page_table_.find(page_id)->second].is_dirty_ = is_dirty;
+  if(pages_[page_table_.find(page_id)->second].GetPinCount() == 0) {
+    free_list_.push_back(page_table_.find(page_id)->second);
+  }
+  return true;
 }
 
 bool BufferPoolManager::FlushPage(page_id_t page_id) {
-  return false;
+  if(page_table_.find(page_id) == page_table_.end()) {
+    //page not found
+    return false;
+  }
+  if(pages_[page_table_.find(page_id)->second].is_dirty_) {
+    //page is dirty
+    //refresh
+    disk_manager_->WritePage(page_id, pages_[page_table_.find(page_id)->second].GetData());
+    pages_[page_table_.find(page_id)->second].is_dirty_ = false;
+  }
+  return true;
 }
 
 page_id_t BufferPoolManager::AllocatePage() {
