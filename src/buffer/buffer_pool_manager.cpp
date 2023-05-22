@@ -83,7 +83,7 @@ Page *BufferPoolManager::NewPage(page_id_t &page_id) {
   R.pin_count_ = 1;
   // Add new page table entry
   page_table_.emplace(page_id, P);
-  pool_size_++;
+//  pool_size_++;
   // 4. Set the page ID output parameter. Return a pointer to P.
   return &R;
 }
@@ -104,7 +104,7 @@ bool BufferPoolManager::DeletePage(page_id_t page_id) {
   disk_manager_->ReadPage(page_id, pages_[page_table_.find(page_id)->second].GetData());
   free_list_.push_back(page_table_.find(page_id)->second);
   // 0.   Make sure you call DeallocatePage!
-  pool_size_--;
+//  pool_size_--;
   DeallocatePage(page_id);
   return true;
 }
