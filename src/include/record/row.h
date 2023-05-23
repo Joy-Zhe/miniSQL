@@ -1,6 +1,6 @@
 #ifndef MINISQL_ROW_H
 #define MINISQL_ROW_H
-
+//jy checked
 #include <memory>
 #include <vector>
 #include "common/macros.h"
@@ -31,8 +31,10 @@ public:
     // deep copy
     for (auto &field : fields) {
       void *buf = heap_->Allocate(sizeof(Field));
-      fields_.push_back(new(buf)Field(field));
+      fields_.push_back(new (buf) Field(field));
+      if (field.IsNull()) null_nums++;//jy added
     }
+    fields_nums = fields.size();//jy added
   }
 
   /**
@@ -59,7 +61,9 @@ public:
     for (auto &field : other.fields_) {
       void *buf = heap_->Allocate(sizeof(Field));
       fields_.push_back(new(buf)Field(*field));
+      if (field->IsNull()) null_nums++;//jy added
     }
+    fields_nums = other.fields_nums;//jy added
   }
 
   virtual ~Row() {
@@ -100,6 +104,9 @@ private:
   RowId rid_{};
   std::vector<Field *> fields_;   /** Make sure that all fields are created by mem heap */
   MemHeap *heap_{nullptr};
+  /*jy added*/
+  uint32_t fields_nums{0};
+  uint32_t null_nums{0};
 };
 
 #endif //MINISQL_TUPLE_H

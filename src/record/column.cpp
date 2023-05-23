@@ -47,20 +47,14 @@ uint32_t ofs = 0, len;
   MACH_WRITE_TO(bool, buf + ofs, unique_);
   ofs += sizeof(bool);
   return ofs;
-  // replace with your code here
-  //return 0;
 }
 
 uint32_t Column::GetSerializedSize() const {
-  // replace with your code here
- // return 0;
         //jy 5.22
    return 4 * sizeof(uint32_t) + name_.size() * sizeof(char) + sizeof(TypeId) + 2 * sizeof(bool);
 }
 
 uint32_t Column::DeserializeFrom(char *buf, Column *&column, MemHeap *heap) {
-  // replace with your code here
-  //return 0;
         //jy 5.22
   auto magic_num = MACH_READ_FROM(uint32_t, buf);
   ASSERT(magic_num == COLUMN_MAGIC_NUM, "Column magic num error.");

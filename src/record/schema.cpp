@@ -1,8 +1,6 @@
 #include "record/schema.h"
 
 uint32_t Schema::SerializeTo(char *buf) const {
-  // replace with your code here
-  //return 0;
   //jy 5.22
   uint32_t ofs = 0;
   MACH_WRITE_TO(uint32_t, buf, SCHEMA_MAGIC_NUM);

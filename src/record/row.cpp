@@ -1,8 +1,6 @@
 #include "record/row.h"
 
 uint32_t Row::SerializeTo(char *buf, Schema *schema) const {
-  // replace with your code here
-  //return 0;
   //jy 5.22
   uint32_t ofs = 0;
   MACH_WRITE_TO(uint32_t, buf, fields_nums);
