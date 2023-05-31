@@ -110,6 +110,9 @@ class Row {
  private:
   RowId rid_{};
   std::vector<Field *> fields_; /** Make sure that all field ptr are destructed*/
+  /*jy added*/
+  uint32_t fields_nums{0};
+  uint32_t null_nums{0};
 };
 
 #endif  // MINISQL_ROW_H
