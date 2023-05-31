@@ -6,9 +6,8 @@
 static string db_file_name = "catalog_test.db";
 
 TEST(CatalogTest, CatalogMetaTest) {
-  SimpleMemHeap heap;
-  char *buf = reinterpret_cast<char *>(heap.Allocate(PAGE_SIZE));
-  CatalogMeta *meta = CatalogMeta::NewInstance(&heap);
+  char *buf = new char[PAGE_SIZE];
+  CatalogMeta *meta = CatalogMeta::NewInstance();
   // fill data
   const int table_nums = 16;
   const int index_nums = 24;
@@ -23,7 +22,7 @@ TEST(CatalogTest, CatalogMetaTest) {
   // serialize
   meta->SerializeTo(buf);
   // deserialize
-  CatalogMeta *other = CatalogMeta::DeserializeFrom(buf, &heap);
+  CatalogMeta *other = CatalogMeta::DeserializeFrom(buf);
   ASSERT_NE(nullptr, other);
   ASSERT_EQ(table_nums + 1, other->GetTableMetaPages()->size());
   ASSERT_EQ(index_nums + 1, other->GetIndexMetaPages()->size());
@@ -35,20 +34,27 @@ TEST(CatalogTest, CatalogMetaTest) {
   for (auto i = 0; i < index_nums; i++) {
     EXPECT_EQ(meta->GetIndexMetaPages()->at(i), other->GetIndexMetaPages()->at(i));
   }
+  delete meta;
+  delete other;
 }
 
 TEST(CatalogTest, CatalogTableTest) {
-  SimpleMemHeap heap;
   /** Stage 2: Testing simple operation */
   auto db_01 = new DBStorageEngine(db_file_name, true);
   auto &catalog_01 = db_01->catalog_mgr_;
   TableInfo *table_info = nullptr;
   ASSERT_EQ(DB_TABLE_NOT_EXIST, catalog_01->GetTable("table-1", table_info));
+<<<<<<< HEAD
   std::vector<Column *> columns = {
           ALLOC_COLUMN(heap)("id", TypeId::kTypeInt, 0, false, false),
           ALLOC_COLUMN(heap)("name", TypeId::kTypeChar, 64, 1, true, false),
           ALLOC_COLUMN(heap)("account", TypeId::kTypeFloat, 2, true, false)
   };
+=======
+  std::vector<Column *> columns = {new Column("id", TypeId::kTypeInt, 0, false, false),
+                                   new Column("name", TypeId::kTypeChar, 64, 1, true, false),
+                                   new Column("account", TypeId::kTypeFloat, 2, true, false)};
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
   auto schema = std::make_shared<Schema>(columns);
   Transaction txn;
   catalog_01->CreateTable("table-1", schema.get(), &txn, table_info);
@@ -69,17 +75,26 @@ TEST(CatalogTest, CatalogTableTest) {
 }
 
 TEST(CatalogTest, CatalogIndexTest) {
+<<<<<<< HEAD
   SimpleMemHeap heap;
+=======
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
   /** Stage 1: Testing simple operation */
   auto db_01 = new DBStorageEngine(db_file_name, true);
   auto &catalog_01 = db_01->catalog_mgr_;
   TableInfo *table_info = nullptr;
   ASSERT_EQ(DB_TABLE_NOT_EXIST, catalog_01->GetTable("table-1", table_info));
+<<<<<<< HEAD
   std::vector<Column *> columns = {
           ALLOC_COLUMN(heap)("id", TypeId::kTypeInt, 0, false, false),
           ALLOC_COLUMN(heap)("name", TypeId::kTypeChar, 64, 1, true, false),
           ALLOC_COLUMN(heap)("account", TypeId::kTypeFloat, 2, true, false)
   };
+=======
+  std::vector<Column *> columns = {new Column("id", TypeId::kTypeInt, 0, false, false),
+                                   new Column("name", TypeId::kTypeChar, 64, 1, true, false),
+                                   new Column("account", TypeId::kTypeFloat, 2, true, false)};
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
   auto schema = std::make_shared<Schema>(columns);
   Transaction txn;
   catalog_01->CreateTable("table-1", schema.get(), &txn, table_info);
@@ -88,6 +103,7 @@ TEST(CatalogTest, CatalogIndexTest) {
   IndexInfo *index_info = nullptr;
   std::vector<std::string> bad_index_keys{"id", "age", "name"};
   std::vector<std::string> index_keys{"id", "name"};
+<<<<<<< HEAD
   auto r1 = catalog_01->CreateIndex("table-0", "index-0", index_keys, &txn, index_info);
   ASSERT_EQ(DB_TABLE_NOT_EXIST, r1);
   auto r2 = catalog_01->CreateIndex("table-1", "index-1", bad_index_keys, &txn, index_info);
@@ -99,6 +115,17 @@ TEST(CatalogTest, CatalogIndexTest) {
             Field(TypeId::kTypeInt, i),
             Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)
     };
+=======
+  auto r1 = catalog_01->CreateIndex("table-0", "index-0", index_keys, &txn, index_info, "bptree");
+  ASSERT_EQ(DB_TABLE_NOT_EXIST, r1);
+  auto r2 = catalog_01->CreateIndex("table-1", "index-1", bad_index_keys, &txn, index_info, "bptree");
+  ASSERT_EQ(DB_COLUMN_NAME_NOT_EXIST, r2);
+  auto r3 = catalog_01->CreateIndex("table-1", "index-1", index_keys, &txn, index_info, "bptree");
+  ASSERT_EQ(DB_SUCCESS, r3);
+  for (int i = 0; i < 10; i++) {
+    std::vector<Field> fields{Field(TypeId::kTypeInt, i),
+                              Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)};
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
     Row row(fields);
     RowId rid(1000, i);
     ASSERT_EQ(DB_SUCCESS, index_info->GetIndex()->InsertEntry(row, rid, nullptr));
@@ -106,10 +133,15 @@ TEST(CatalogTest, CatalogIndexTest) {
   // Scan Key
   std::vector<RowId> ret;
   for (int i = 0; i < 10; i++) {
+<<<<<<< HEAD
     std::vector<Field> fields{
             Field(TypeId::kTypeInt, i),
             Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)
     };
+=======
+    std::vector<Field> fields{Field(TypeId::kTypeInt, i),
+                              Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)};
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
     Row row(fields);
     RowId rid(1000, i);
     ASSERT_EQ(DB_SUCCESS, index_info->GetIndex()->ScanKey(row, ret, &txn));
@@ -119,16 +151,25 @@ TEST(CatalogTest, CatalogIndexTest) {
   /** Stage 2: Testing catalog loading */
   auto db_02 = new DBStorageEngine(db_file_name, false);
   auto &catalog_02 = db_02->catalog_mgr_;
+<<<<<<< HEAD
   auto r4 = catalog_02->CreateIndex("table-1", "index-1", index_keys, &txn, index_info);
+=======
+  auto r4 = catalog_02->CreateIndex("table-1", "index-1", index_keys, &txn, index_info, "bptree");
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
   ASSERT_EQ(DB_INDEX_ALREADY_EXIST, r4);
   IndexInfo *index_info_02 = nullptr;
   ASSERT_EQ(DB_SUCCESS, catalog_02->GetIndex("table-1", "index-1", index_info_02));
   std::vector<RowId> ret_02;
   for (int i = 0; i < 10; i++) {
+<<<<<<< HEAD
     std::vector<Field> fields{
             Field(TypeId::kTypeInt, i),
             Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)
     };
+=======
+    std::vector<Field> fields{Field(TypeId::kTypeInt, i),
+                              Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)};
+>>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
     Row row(fields);
     RowId rid(1000, i);
     ASSERT_EQ(DB_SUCCESS, index_info_02->GetIndex()->ScanKey(row, ret_02, &txn));

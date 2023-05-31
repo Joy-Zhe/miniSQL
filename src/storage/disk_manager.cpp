@@ -1,9 +1,11 @@
-#include <stdexcept>
+#include "storage/disk_manager.h"
+
 #include <sys/stat.h>
+#include <filesystem>
+#include <stdexcept>
 
 #include "glog/logging.h"
 #include "page/bitmap_page.h"
-#include "storage/disk_manager.h"
 
 DiskManager::DiskManager(const std::string &db_file) : file_name_(db_file) {
   std::scoped_lock<std::recursive_mutex> lock(db_io_latch_);
@@ -12,6 +14,8 @@ DiskManager::DiskManager(const std::string &db_file) : file_name_(db_file) {
   if (!db_io_.is_open()) {
     db_io_.clear();
     // create a new file
+    std::filesystem::path p = db_file;
+    if(p.has_parent_path()) std::filesystem::create_directories(p.parent_path());
     db_io_.open(db_file, std::ios::binary | std::ios::trunc | std::ios::out);
     db_io_.close();
     // reopen with original mode

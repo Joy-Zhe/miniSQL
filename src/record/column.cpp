@@ -1,14 +1,15 @@
 #include "record/column.h"
 
+#include "glog/logging.h"
+
 Column::Column(std::string column_name, TypeId type, uint32_t index, bool nullable, bool unique)
-        : name_(std::move(column_name)), type_(type), table_ind_(index),
-          nullable_(nullable), unique_(unique) {
+    : name_(std::move(column_name)), type_(type), table_ind_(index), nullable_(nullable), unique_(unique) {
   ASSERT(type != TypeId::kTypeChar, "Wrong constructor for CHAR type.");
   switch (type) {
-    case TypeId::kTypeInt :
+    case TypeId::kTypeInt:
       len_ = sizeof(int32_t);
       break;
-    case TypeId::kTypeFloat :
+    case TypeId::kTypeFloat:
       len_ = sizeof(float_t);
       break;
     default:

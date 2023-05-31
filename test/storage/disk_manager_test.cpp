@@ -1,7 +1,8 @@
+#include "storage/disk_manager.h"
+
 #include <unordered_set>
 
 #include "gtest/gtest.h"
-#include "storage/disk_manager.h"
 
 TEST(DiskManagerTest, BitMapPageTest) {
   const size_t size = 512;
@@ -40,9 +41,6 @@ TEST(DiskManagerTest, FreePageAllocationTest) {
   for (uint32_t i = 0; i < DiskManager::BITMAP_SIZE * extent_nums; i++) {
     page_id_t page_id = disk_mgr->AllocatePage();
     DiskFileMetaPage *meta_page = reinterpret_cast<DiskFileMetaPage *>(disk_mgr->GetMetaData());
-//    if(i == 60000) {
-//      std::cout << 1 << std::endl;
-//    }
     EXPECT_EQ(i, page_id);
     EXPECT_EQ(i / DiskManager::BITMAP_SIZE + 1, meta_page->GetExtentNums());
     EXPECT_EQ(i + 1, meta_page->GetAllocatedPages());

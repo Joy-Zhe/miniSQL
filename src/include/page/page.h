@@ -14,10 +14,10 @@
  * pin count, dirty flag, page id, etc.
  */
 class Page {
-  // There is book-keeping information inside the page that should only be relevant to the buffer pool manager.
+  // There is bookkeeping information inside the page that should only be relevant to the buffer pool manager.
   friend class BufferPoolManager;
 
-public:
+ public:
   DISALLOW_COPY(Page)
 
   /** Constructor. Zeros out the page data. */
@@ -66,7 +66,7 @@ protected:
   static constexpr size_t OFFSET_PAGE_START = 0;
   static constexpr size_t OFFSET_LSN = 4;
 
-private:
+ private:
   /** Zeroes out the data that is held within the page. */
   inline void ResetMemory() { memset(data_, OFFSET_PAGE_START, PAGE_SIZE); }
 
