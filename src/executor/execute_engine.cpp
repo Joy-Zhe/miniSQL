@@ -246,28 +246,19 @@ dberr_t ExecuteEngine::ExecuteCreateDatabase(pSyntaxNode ast, ExecuteContext *co
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteDropDatabase(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteDropDatabase" << std::endl;
 #endif
-<<<<<<< HEAD
-  return DB_FAILED;
-}
-
-=======
  return DB_FAILED;
 }
 
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteShowDatabases(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteShowDatabases" << std::endl;
@@ -275,12 +266,9 @@ dberr_t ExecuteEngine::ExecuteShowDatabases(pSyntaxNode ast, ExecuteContext *con
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteUseDatabase(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteUseDatabase" << std::endl;
@@ -288,12 +276,9 @@ dberr_t ExecuteEngine::ExecuteUseDatabase(pSyntaxNode ast, ExecuteContext *conte
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteShowTables(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteShowTables" << std::endl;
@@ -301,12 +286,9 @@ dberr_t ExecuteEngine::ExecuteShowTables(pSyntaxNode ast, ExecuteContext *contex
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteCreateTable(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteCreateTable" << std::endl;
@@ -314,28 +296,19 @@ dberr_t ExecuteEngine::ExecuteCreateTable(pSyntaxNode ast, ExecuteContext *conte
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteDropTable(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteDropTable" << std::endl;
 #endif
-<<<<<<< HEAD
-  return DB_FAILED;
-}
-
-=======
  return DB_FAILED;
 }
 
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteShowIndexes(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteShowIndexes" << std::endl;
@@ -343,12 +316,9 @@ dberr_t ExecuteEngine::ExecuteShowIndexes(pSyntaxNode ast, ExecuteContext *conte
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteCreateIndex(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteCreateIndex" << std::endl;
@@ -356,12 +326,9 @@ dberr_t ExecuteEngine::ExecuteCreateIndex(pSyntaxNode ast, ExecuteContext *conte
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteDropIndex(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteDropIndex" << std::endl;
@@ -369,36 +336,6 @@ dberr_t ExecuteEngine::ExecuteDropIndex(pSyntaxNode ast, ExecuteContext *context
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-dberr_t ExecuteEngine::ExecuteSelect(pSyntaxNode ast, ExecuteContext *context) {
-#ifdef ENABLE_EXECUTE_DEBUG
-  LOG(INFO) << "ExecuteSelect" << std::endl;
-#endif
-  return DB_FAILED;
-}
-
-dberr_t ExecuteEngine::ExecuteInsert(pSyntaxNode ast, ExecuteContext *context) {
-#ifdef ENABLE_EXECUTE_DEBUG
-  LOG(INFO) << "ExecuteInsert" << std::endl;
-#endif
-  return DB_FAILED;
-}
-
-dberr_t ExecuteEngine::ExecuteDelete(pSyntaxNode ast, ExecuteContext *context) {
-#ifdef ENABLE_EXECUTE_DEBUG
-  LOG(INFO) << "ExecuteDelete" << std::endl;
-#endif
-  return DB_FAILED;
-}
-
-dberr_t ExecuteEngine::ExecuteUpdate(pSyntaxNode ast, ExecuteContext *context) {
-#ifdef ENABLE_EXECUTE_DEBUG
-  LOG(INFO) << "ExecuteUpdate" << std::endl;
-#endif
-  return DB_FAILED;
-}
-=======
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 
 dberr_t ExecuteEngine::ExecuteTrxBegin(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
@@ -421,12 +358,9 @@ dberr_t ExecuteEngine::ExecuteTrxRollback(pSyntaxNode ast, ExecuteContext *conte
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteExecfile(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteExecfile" << std::endl;
@@ -434,21 +368,12 @@ dberr_t ExecuteEngine::ExecuteExecfile(pSyntaxNode ast, ExecuteContext *context)
   return DB_FAILED;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * TODO: Student Implement
  */
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 dberr_t ExecuteEngine::ExecuteQuit(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteQuit" << std::endl;
 #endif
-<<<<<<< HEAD
-  ASSERT(ast->type_ == kNodeQuit, "Unexpected node type.");
-  context->flag_quit_ = true;
-  return DB_SUCCESS;
-=======
  return DB_FAILED;
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 }

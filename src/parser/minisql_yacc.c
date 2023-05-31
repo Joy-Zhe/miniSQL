@@ -1204,14 +1204,8 @@ yysyntax_error (char *yyresult, int yystate, int yychar)
 /*ARGSUSED*/
 #if (defined __STDC__ || defined __C99__FUNC__ \
      || defined __cplusplus || defined _MSC_VER)
-<<<<<<< HEAD
-
-static void
-yydestruct(const char *yymsg, int yytype, YYSTYPE *yyvaluep)
-=======
 static void
 yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep)
->>>>>>> e36b9ce7c7d3372282cfd7b8d5ea642bf7a636a5
 #else
 static void
 yydestruct (yymsg, yytype, yyvaluep)
