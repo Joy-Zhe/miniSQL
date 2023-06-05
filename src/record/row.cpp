@@ -38,9 +38,9 @@ uint32_t Row::DeserializeFrom(char *buf, Schema *schema) {
     ofs += sizeof(uint32_t);
   }
   for (i = 0; i < fields_nums; i++) {
-    fields_.push_back(ALLOC_P(heap_, Field)(schema->GetColumn(i)->GetType()));
+//    fields_.push_back(ALLOC_P(heap_, Field)(schema->GetColumn(i)->GetType()));
     if (!null_bitmap[i]) {
-      ofs += Field::DeserializeFrom(buf + ofs, schema->GetColumn(i)->GetType(), &fields_[i], false, heap_);
+//      ofs += Field::DeserializeFrom(buf + ofs, schema->GetColumn(i)->GetType(), &fields_[i], false, heap_);
     }
   }
   return ofs;
