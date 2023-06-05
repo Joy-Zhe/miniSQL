@@ -113,6 +113,7 @@ class Row {
   /*jy added*/
   uint32_t fields_nums{0};
   uint32_t null_nums{0};
+ static constexpr uint32_t ROW_MAGIC_NUM = 10117;
 };
 
 #endif  // MINISQL_ROW_H
