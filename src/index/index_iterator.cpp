@@ -16,11 +16,28 @@ IndexIterator::~IndexIterator() {
 }
 
 std::pair<GenericKey *, RowId> IndexIterator::operator*() {
-  ASSERT(false, "Not implemented yet.");
+//  ASSERT(false, "Not implemented yet.");
+  LeafPage *leaf_page = reinterpret_cast<LeafPage *>(buffer_pool_manager->FetchPage(current_page_id)->GetData());
+  return std::make_pair(leaf_page->KeyAt(item_index), leaf_page->ValueAt(item_index));
 }
 
 IndexIterator &IndexIterator::operator++() {
-  ASSERT(false, "Not implemented yet.");
+//  ASSERT(false, "Not implemented yet.");
+  LeafPage *leaf_page = reinterpret_cast<LeafPage *>(buffer_pool_manager->FetchPage(current_page_id)->GetData());
+  if (item_index + 1 < leaf_page->GetSize()) {
+    item_index++;
+  } else {
+    current_page_id = leaf_page->GetNextPageId();
+    item_index = 0;
+    buffer_pool_manager->UnpinPage(leaf_page->GetPageId(), false);
+    if (current_page_id != INVALID_PAGE_ID) {
+      leaf_page = reinterpret_cast<LeafPage *>(buffer_pool_manager->FetchPage(current_page_id)->GetData());
+    } else {
+      leaf_page = nullptr;
+    }
+  }
+  page = leaf_page;
+  return *this;
 }
 
 bool IndexIterator::operator==(const IndexIterator &itr) const {

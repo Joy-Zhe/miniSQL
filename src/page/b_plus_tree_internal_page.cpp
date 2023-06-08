@@ -295,24 +295,18 @@ void InternalPage::CopyLastFrom(GenericKey *key, const page_id_t value, BufferPo
 void InternalPage::MoveLastToFrontOf(InternalPage *recipient, GenericKey *middle_key,
                                      BufferPoolManager *buffer_pool_manager) {
   int last_index = GetSize() - 1;
-  int size = recipient->GetSize();
-  for(int i = size; i > 0; i--) {
-    recipient->SetKeyAt(i, recipient->KeyAt(i - 1));
-    recipient->SetValueAt(i, recipient->ValueAt(i - 1));
-  }
-  //move the last key & value pair to the front of the recipient
+  page_id_t value = ValueAt(last_index);
+  Remove(last_index);
+  recipient->CopyFirstFrom(value, buffer_pool_manager);
   recipient->SetKeyAt(0, middle_key);
-  recipient->SetValueAt(0, ValueAt(last_index));
-  //update parent page id
-  if(buffer_pool_manager != nullptr) {
-    page_id_t page_id = ValueAt(last_index);
-    InternalPage *page = reinterpret_cast<InternalPage *>(buffer_pool_manager->FetchPage(page_id));
+  //update the parent id of the moved page
+  if (buffer_pool_manager != nullptr) {
+    InternalPage *page = reinterpret_cast<InternalPage *>(buffer_pool_manager->FetchPage(value));
     if(page != nullptr) {
       page->SetParentPageId(recipient->GetPageId());
-      buffer_pool_manager->UnpinPage(page_id, true);
+      buffer_pool_manager->UnpinPage(value, true);
     }
   }
-  Remove(last_index);
 }
 
 /* Append an entry at the beginning.
