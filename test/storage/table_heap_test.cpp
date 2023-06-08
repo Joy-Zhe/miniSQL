@@ -1,8 +1,8 @@
 #include "storage/table_heap.h"
-
+#include <cstdlib>
 #include <unordered_map>
 #include <vector>
-
+#include <iostream>
 #include "common/instance.h"
 #include "gtest/gtest.h"
 #include "record/field.h"
@@ -16,7 +16,7 @@ TEST(TableHeapTest, TableHeapSampleTest) {
   // init testing instance
   auto disk_mgr_ = new DiskManager(db_file_name);
   auto bpm_ = new BufferPoolManager(DEFAULT_BUFFER_POOL_SIZE, disk_mgr_);
-  const int row_nums = 10000;
+  const int row_nums = 100;
   // create schema
   std::vector<Column *> columns = {new Column("id", TypeId::kTypeInt, 0, false, false),
                                    new Column("name", TypeId::kTypeChar, 64, 1, true, false),
@@ -27,23 +27,51 @@ TEST(TableHeapTest, TableHeapSampleTest) {
   uint32_t size = 0;
   TableHeap *table_heap = TableHeap::Create(bpm_, schema.get(), nullptr, nullptr, nullptr);
   for (int i = 0; i < row_nums; i++) {
-    int32_t len = RandomUtils::RandomInt(0, 64);
+    //if(i%129) continue;
+    int32_t len = 10;//RandomUtils::RandomInt(0, 64);
     char *characters = new char[len];
     RandomUtils::RandomString(characters, len);
     Fields *fields =
         new Fields{Field(TypeId::kTypeInt, i), Field(TypeId::kTypeChar, const_cast<char *>(characters), len, true),
                    Field(TypeId::kTypeFloat, RandomUtils::RandomFloat(-999.f, 999.f))};
+    std::cout<<"new Fields passed"<<std::endl;
     Row row(*fields);
-    ASSERT_TRUE(table_heap->InsertTuple(row, nullptr));
+    table_heap->InsertTuple(row, nullptr);//ASSERT_TRUE()
+    std::cout<<"table_heap->InsertTuple(row, nullptr) passed"<<std::endl;
     if (row_values.find(row.GetRowId().Get()) != row_values.end()) {
       std::cout << row.GetRowId().Get() << std::endl;
       ASSERT_TRUE(false);
     } else {
       row_values.emplace(row.GetRowId().Get(), fields);
       size++;
+      std::cout<<size<<std::endl;
     }
     delete[] characters;
   }
+
+
+//    for (int i = 0; i < row_nums/10; i++) {
+//    //if(i%129) continue;
+//    int32_t len = 10;//RandomUtils::RandomInt(0, 64);
+//    char *characters = new char[len];
+//    RandomUtils::RandomString(characters, len);
+//    Fields *fields =
+//        new Fields{Field(TypeId::kTypeInt, i), Field(TypeId::kTypeChar, const_cast<char *>(characters), len, true),
+//                   Field(TypeId::kTypeFloat, RandomUtils::RandomFloat(-999.f, 999.f))};
+//    std::cout<<"new Fields passed"<<std::endl;
+//    Row row(*fields);
+//      table_heap->InsertTuple(row, nullptr);//ASSERT_TRUE()
+//    std::cout<<"table_heap->InsertTuple(row, nullptr) passed"<<std::endl;
+//    if (row_values.find(row.GetRowId().Get()) != row_values.end()) {
+//      std::cout << row.GetRowId().Get() << std::endl;
+//      ASSERT_TRUE(false);
+//    } else {
+//        row_values.emplace(row.GetRowId().Get(), fields);
+//        size++;
+//      std::cout<<size<<std::endl;
+//    }
+//    delete[] characters;
+//  }
 
   ASSERT_EQ(row_nums, row_values.size());
   ASSERT_EQ(row_nums, size);

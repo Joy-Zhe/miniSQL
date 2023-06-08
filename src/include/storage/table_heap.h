@@ -113,7 +113,13 @@ private:
           schema_(schema),
           log_manager_(log_manager),
           lock_manager_(lock_manager) {
-    ASSERT(false, "Not implemented yet.");
+    //ASSERT(false, "Not implemented yet.");
+    auto first_page = (TablePage *)(buffer_pool_manager_->NewPage(first_page_id_));
+    ASSERT(first_page != nullptr, "Can not initialize the first page for table heap.");
+    first_page->Init(first_page_id_, INVALID_PAGE_ID, log_manager_, txn);
+
+    // first created, need to write to disk, so it's dirty
+    buffer_pool_manager_->UnpinPage(first_page_id_, true);
   };
 
   explicit TableHeap(BufferPoolManager *buffer_pool_manager, page_id_t first_page_id, Schema *schema,
@@ -128,8 +134,8 @@ private:
   BufferPoolManager *buffer_pool_manager_;
   page_id_t first_page_id_;
   Schema *schema_;
-  [[maybe_unused]] LogManager *log_manager_;
-  [[maybe_unused]] LockManager *lock_manager_;
+   LogManager *log_manager_;
+   LockManager *lock_manager_;
 };
 
 #endif  // MINISQL_TABLE_HEAP_H
