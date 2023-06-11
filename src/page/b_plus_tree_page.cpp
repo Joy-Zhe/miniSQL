@@ -1,5 +1,5 @@
 #include "page/b_plus_tree_page.h"
-
+#include "glog/logging.h"
 /*
  * Helper methods to get/set page type
  * Page type enum class is defined in b_plus_tree_page.h
@@ -8,6 +8,7 @@
  * TODO: Student Implement
  */
 bool BPlusTreePage::IsLeafPage() const {
+//  cout << (page_type_ == IndexPageType::LEAF_PAGE) << endl;
   return (page_type_ == IndexPageType::LEAF_PAGE);
 }
 

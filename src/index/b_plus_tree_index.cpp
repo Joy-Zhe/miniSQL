@@ -16,10 +16,11 @@ dberr_t BPlusTreeIndex::InsertEntry(const Row &key, RowId row_id, Transaction *t
 
   bool status = container_.Insert(index_key, row_id, txn);
   delete index_key;
-  //  TreeFileManagers mgr("tree_");
-  //  static int i = 0;
-  //  if (i % 10 == 0) container_.PrintTree(mgr[i]);
-  //  i++;
+//    TreeFileManagers mgr("tree_");
+//    static int i = 0;
+//    if (i % 10 == 0)
+//      container_.PrintTree(mgr[i]);
+//    i++;
 
   if (!status) {
     return DB_FAILED;
@@ -37,6 +38,7 @@ dberr_t BPlusTreeIndex::RemoveEntry(const Row &key, RowId row_id, Transaction *t
 }
 
 dberr_t BPlusTreeIndex::ScanKey(const Row &key, vector<RowId> &result, Transaction *txn, string compare_operator) {
+  LOG(INFO) << "ScanKey called.";
   GenericKey *index_key = processor_.InitKey();
   processor_.SerializeFromKey(index_key, key, key_schema_);
   if (compare_operator == "=") {

@@ -111,6 +111,7 @@ uint32_t Row::DeserializeFrom(char *buf, Schema *schema) {
   // replace with your code here
   uint32_t num=0,ofs=0,row_magic_num;//RowId rid;
   row_magic_num= MACH_READ_FROM(uint32_t,buf+ofs); ofs+=sizeof(uint32_t);
+//  LOG(INFO) << "row_magic_num:" << row_magic_num;
   ASSERT(row_magic_num==10117,"Error!");
   num=MACH_READ_FROM(uint32_t,buf+ofs); ofs+=sizeof(uint32_t);
   uint32_t psize=num/8;

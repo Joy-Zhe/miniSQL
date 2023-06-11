@@ -32,6 +32,8 @@ class BufferPoolManager {
 
   bool CheckAllUnpinned();
 
+  size_t GetFreeSize();
+
  private:
   /**
    * Allocate new page (operations like create index/table) For now just keep an increasing counter

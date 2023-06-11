@@ -43,7 +43,10 @@ class Row {
     }
   }
 
-  ~Row() { destroy(); };
+  ~Row() {
+    destroy();
+//    LOG(INFO) << "destroy row" ;
+  };
 
   /**
    * Row used for deserialize

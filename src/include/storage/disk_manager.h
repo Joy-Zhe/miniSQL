@@ -36,7 +36,7 @@ class DiskManager {
   void ReadPage(page_id_t logical_page_id, char *page_data);
 
   /**
-   * Write data to specific page
+     * Write data to specific page
    * Note: page_id = 0 is reserved for free page bit map
    */
   void WritePage(page_id_t logical_page_id, const char *page_data);
