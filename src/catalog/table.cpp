@@ -1,5 +1,7 @@
 #include "catalog/table.h"
 
+#include <utility>
+
 uint32_t TableMetadata::SerializeTo(char *buf) const {
     char *p = buf;
     uint32_t ofs = GetSerializedSize();
@@ -29,7 +31,10 @@ uint32_t TableMetadata::SerializeTo(char *buf) const {
  * TODO: Student Implement
  */
 uint32_t TableMetadata::GetSerializedSize() const {
-  return 0;
+    return 4 + 4 + 4 +
+           table_name_.length() +
+           4 +
+           schema_->GetSerializedSize();
 }
 
 uint32_t TableMetadata::DeserializeFrom(char *buf, TableMetadata *&table_meta) {
