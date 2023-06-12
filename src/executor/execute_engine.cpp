@@ -375,5 +375,8 @@ dberr_t ExecuteEngine::ExecuteQuit(pSyntaxNode ast, ExecuteContext *context) {
 #ifdef ENABLE_EXECUTE_DEBUG
   LOG(INFO) << "ExecuteQuit" << std::endl;
 #endif
- return DB_FAILED;
+  ASSERT(ast->type_ == kNodeQuit, "Unexpected node type.");
+  context->flag_quit_ = true;
+  return DB_SUCCESS;
+  //return DB_FAILED;
 }
