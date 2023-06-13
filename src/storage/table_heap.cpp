@@ -125,7 +125,6 @@ bool TableHeap::UpdateTuple(const Row &row, const RowId &rid, Transaction *txn) 
     page->WUnlatch();page->RUnlatch();
     delete p;
     return flag;
-  //return false;
 }
 
 /**
@@ -194,13 +193,11 @@ TableIterator TableHeap::Begin(Transaction *txn) {//
   }
   // would return INVALID_ROWID if there is no page
   return TableIterator(this, begin_row_id, txn);//
-  //return TableIterator();
 }
 
 /**
  * TODO: Student Implement
  */
 TableIterator TableHeap::End() {
-  return TableIterator(this, RowId(INVALID_PAGE_ID, 0, nullptr));//
-  //return TableIterator();
+  return TableIterator(this, RowId(INVALID_PAGE_ID, 0), nullptr);//
 }
