@@ -34,8 +34,8 @@ class BPlusTreeLeafPage : public BPlusTreePage {
  public:
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
-  void Init(page_id_t page_id, page_id_t parent_id = INVALID_PAGE_ID, int key_size = sizeof(GenericKey),
-            int max_size = LEAF_PAGE_SIZE);
+  void Init(page_id_t page_id, page_id_t parent_id = INVALID_PAGE_ID, int key_size = UNDEFINED_SIZE,
+            int max_size = UNDEFINED_SIZE);
 
   // helper methods
   page_id_t GetNextPageId() const;
