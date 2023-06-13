@@ -74,7 +74,7 @@ class IndexInfo {
     // Step3: call CreateIndex to create the index
     index_ = CreateIndex(buffer_pool_manager, index_type);
 
-    ASSERT(false, "Not Implemented yet.");
+    // ASSERT(false, "Not Implemented yet.");
   }
 
   inline Index *GetIndex() { return index_; }
