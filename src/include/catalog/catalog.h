@@ -20,7 +20,7 @@ class CatalogMeta {
  public:
   void SerializeTo(char *buf) const;
 
-  static CatalogMeta *DeserializeFrom(char *buf);
+  static CatalogMeta *DeserializeFrom(char *buf); // change
 
   uint32_t GetSerializedSize() const;
 
@@ -32,7 +32,7 @@ class CatalogMeta {
     return index_meta_pages_.size() == 0 ? 0 : index_meta_pages_.rbegin()->first;
   }
 
-  static CatalogMeta *NewInstance() { return new CatalogMeta(); }
+  static CatalogMeta *NewInstance() { return new CatalogMeta(); }  // change
 
   /**
    * Used only for testing
@@ -47,7 +47,7 @@ class CatalogMeta {
   /**
    * Delete index meta data and its meta page.
    */
-  bool DeleteIndexMetaPage(BufferPoolManager *bpm, index_id_t index_id) {
+  bool DeleteIndexMetaPage(BufferPoolManager *bpm, index_id_t index_id) {   // add
     if (index_meta_pages_.find(index_id) == index_meta_pages_.end()) {
       return false;
     }
@@ -57,7 +57,7 @@ class CatalogMeta {
   }
 
  private:
-  CatalogMeta();
+  CatalogMeta(); // explicit
 
  private:
   static constexpr uint32_t CATALOG_METADATA_MAGIC_NUM = 89849;
@@ -95,7 +95,7 @@ class CatalogManager {
   dberr_t DropIndex(const std::string &table_name, const std::string &index_name);
 
  private:
-  dberr_t DropTable(table_id_t table_id);
+  dberr_t DropTable(table_id_t table_id); // add
 
   dberr_t FlushCatalogMetaPage() const;
 
@@ -109,9 +109,9 @@ class CatalogManager {
   [[maybe_unused]] BufferPoolManager *buffer_pool_manager_;
   [[maybe_unused]] LockManager *lock_manager_;
   [[maybe_unused]] LogManager *log_manager_;
-  CatalogMeta *catalog_meta_;
-  std::atomic<table_id_t> next_table_id_;
-  std::atomic<index_id_t> next_index_id_;
+  CatalogMeta *catalog_meta_;  // change
+  std::atomic<table_id_t> next_table_id_;  // change
+  std::atomic<index_id_t> next_index_id_;  // change
   // map for tables
   std::unordered_map<std::string, table_id_t> table_names_;
   std::unordered_map<table_id_t, TableInfo *> tables_;

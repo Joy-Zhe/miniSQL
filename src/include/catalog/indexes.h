@@ -63,10 +63,17 @@ class IndexInfo {
 /**
  * TODO: Student Implement
  */
-  void Init(IndexMetadata *meta_data, TableInfo *table_info, BufferPoolManager *buffer_pool_manager) {
+  void Init(IndexMetadata *meta_data, TableInfo *table_info, BufferPoolManager *buffer_pool_manager,
+            const string &index_type = "bptree") {
     // Step1: init index metadata and table info
+    meta_data_ = meta_data;
+
     // Step2: mapping index key to key schema
+    key_schema_ = Schema::ShallowCopySchema(table_info->GetSchema(), meta_data_->key_map_);
+
     // Step3: call CreateIndex to create the index
+    index_ = CreateIndex(buffer_pool_manager, index_type);
+
     ASSERT(false, "Not Implemented yet.");
   }
 
