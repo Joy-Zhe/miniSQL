@@ -10,7 +10,7 @@ class TableHeap;
 class TableIterator {
 public:
   // you may define your own constructor based on your member variables
-  explicit TableIterator(TableHeap *table_heap, RowId rid/*, Transaction *txn*/);//, Transaction *txn
+  explicit TableIterator(TableHeap *table_heap, RowId rid, Transaction *txn);
 
   TableIterator(const TableIterator &other);//explicit
 
