@@ -105,7 +105,7 @@ void BPlusTree::StartNewTree(GenericKey *key, const RowId &value) {
     throw runtime_error("out of memory");
   }
   BPlusTreeLeafPage *leaf_page = reinterpret_cast<BPlusTreeLeafPage*>(page->GetData());
-  leaf_page->Init(new_page_id, INVALID_PAGE_ID);
+  leaf_page->Init(new_page_id, INVALID_PAGE_ID, sizeof(GenericKey), LEAF_PAGE_SIZE);
   LOG(INFO) << "SN leaf_page is root ?:" << leaf_page->IsRootPage();
   LOG(INFO) << "SN leaf_page is leaf ?:" << leaf_page->IsLeafPage();
   root_page_id_ = new_page_id;
@@ -129,8 +129,7 @@ bool BPlusTree::InsertIntoLeaf(GenericKey *key, const RowId &value, Transaction 
   BPlusTreeLeafPage *leafPage = reinterpret_cast<BPlusTreeLeafPage *>(page->GetData());
   LOG(INFO) << "leaf_page is root ?, Insert into leaf:" << leafPage->IsRootPage();
   LOG(INFO) << "leaf_page is leaf ?, Insert into leaf:" << leafPage->IsLeafPage();
-  bool myresult = leafPage->Lookup(key, v, processor_);
-  if (myresult) {
+  if (leafPage->Lookup(key, v, processor_)) {
     buffer_pool_manager_->UnpinPage(leafPage->GetPageId(), false);
     LOG(INFO) << "failed";
     return false;
@@ -237,7 +236,7 @@ void BPlusTree::InsertIntoParent(BPlusTreePage *old_node, GenericKey *key, BPlus
       throw std::string("out of memory");
     }
     InternalPage *newrootpage = reinterpret_cast<InternalPage *>(page->GetData());
-    newrootpage->Init(root_page_id_, INVALID_PAGE_ID, internal_max_size_);
+    newrootpage->Init(root_page_id_, INVALID_PAGE_ID, sizeof(GenericKey),INTERNAL_PAGE_SIZE);
     newrootpage->PopulateNewRoot(old_node->GetPageId(), key, new_node->GetPageId());
     old_node->SetParentPageId(root_page_id_);
     new_node->SetParentPageId(root_page_id_);
@@ -250,9 +249,9 @@ void BPlusTree::InsertIntoParent(BPlusTreePage *old_node, GenericKey *key, BPlus
     new_node->SetParentPageId(old_node->GetParentPageId());
     newpre_page->InsertNodeAfter(old_node->GetPageId(), key, new_node->GetPageId());
     if (newpre_page->GetSize() > newpre_page->GetMaxSize()) {
-      InternalPage *t_newpre_page = Split(newpre_page, transaction);
-      buffer_pool_manager_->UnpinPage(t_newpre_page->GetPageId(), true);
-      InsertIntoParent(newpre_page, t_newpre_page->KeyAt(0), t_newpre_page, transaction);
+      InternalPage *pre_page = Split(newpre_page, transaction);
+      buffer_pool_manager_->UnpinPage(pre_page->GetPageId(), true);
+      InsertIntoParent(newpre_page, pre_page->KeyAt(0), pre_page, transaction);
     }
     buffer_pool_manager_->UnpinPage(old, true);
   }
