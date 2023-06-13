@@ -45,7 +45,6 @@ class Row {
 
   ~Row() {
     destroy();
-//    LOG(INFO) << "destroy row" ;
   };
 
   /**
