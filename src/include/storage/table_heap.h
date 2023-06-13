@@ -91,7 +91,7 @@ class TableHeap {
   /**
    * @return the begin iterator of this table
    */
-  TableIterator Begin();//Transaction *txn
+  TableIterator Begin(Transaction *txn);//
 
   /**
    * @return the end iterator of this table
