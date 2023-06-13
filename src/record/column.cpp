@@ -68,7 +68,7 @@ uint32_t Column::SerializeTo(char *buf) const {
 uint32_t Column::GetSerializedSize() const {
   // replace with your code here
   return 4 * sizeof(uint32_t) + name_.size() * sizeof(char) + sizeof(TypeId) + 2 * sizeof(bool);
-  return 0;
+  //return 0;
 }
 
 /**
@@ -96,10 +96,10 @@ uint32_t Column::DeserializeFrom(char *buf, Column *&column) {
   ofs += sizeof(bool);
   auto unique_ = MACH_READ_FROM(bool, buf + ofs);
   ofs += sizeof(bool);
-//  if (type_ != kTypeChar)  // not char type
-//    column = ALLOC_P(heap, Column)(name_, type_, table_ind_, nullable_, unique_);
-//  else
-//    column = ALLOC_P(heap, Column)(name_, type_, len_, table_ind_, nullable_, unique_);
+  if (type_ != kTypeChar)  // not char type
+    column = new Column(name_, type_, table_ind_, nullable_, unique_);
+  else
+    column = new Column(name_, type_, len_, table_ind_, nullable_, unique_);
   return ofs;
-  return 0;
+
 }

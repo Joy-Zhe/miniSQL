@@ -4,7 +4,6 @@
  * TODO: Student Implement
  */
 uint32_t Schema::SerializeTo(char *buf) const {
-  // replace with your code here
   uint32_t ofs = 0;
   MACH_WRITE_TO(uint32_t, buf, SCHEMA_MAGIC_NUM);
   ofs += sizeof(uint32_t);
@@ -14,7 +13,6 @@ uint32_t Schema::SerializeTo(char *buf) const {
     ofs += itr->SerializeTo(buf + ofs);
   }
   return ofs;
-  //return 0;
 }
 
 uint32_t Schema::GetSerializedSize() const {
@@ -24,7 +22,6 @@ uint32_t Schema::GetSerializedSize() const {
     size += itr->GetSerializedSize();
   }
   return size + 2 * sizeof(uint32_t);
-  //return 0;
 }
 
 uint32_t Schema::DeserializeFrom(char *buf, Schema *&schema) {
@@ -40,7 +37,7 @@ uint32_t Schema::DeserializeFrom(char *buf, Schema *&schema) {
     ofs += Column::DeserializeFrom(buf + ofs, col);
     columns.push_back(col);
   }
-  //schema = ALLOC_P(heap, Schema)(columns);
+  schema = new Schema(columns);
   return ofs;
-  //return 0;
+
 }
