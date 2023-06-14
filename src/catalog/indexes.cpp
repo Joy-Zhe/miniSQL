@@ -53,7 +53,7 @@ uint32_t IndexMetadata::GetSerializedSize() const {
 
 uint32_t IndexMetadata::DeserializeFrom(char *buf, IndexMetadata *&index_meta) {
     if (index_meta != nullptr) {
-        LOG(WARNING) << "Pointer object index info is not null in table info deserialize." << std::endl;
+
     }
     char *p = buf;
     // magic num
@@ -104,7 +104,7 @@ Index *IndexInfo::CreateIndex(BufferPoolManager *buffer_pool_manager, const stri
     else if (max_size <= 248)
       max_size = 256;
     else {
-      LOG(ERROR) << "GenericKey size is too large";
+
       return nullptr;
     }
   } else {

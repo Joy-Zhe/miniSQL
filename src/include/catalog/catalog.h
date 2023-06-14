@@ -25,11 +25,11 @@ class CatalogMeta {
   uint32_t GetSerializedSize() const;
 
   inline table_id_t GetNextTableId() const {
-    return table_meta_pages_.size() == 0 ? 0 : table_meta_pages_.rbegin()->first;
+    return table_meta_pages_.size() == 0 ? 0 : table_meta_pages_.rbegin()->first + 1;
   }
 
   inline index_id_t GetNextIndexId() const {
-    return index_meta_pages_.size() == 0 ? 0 : index_meta_pages_.rbegin()->first;
+    return index_meta_pages_.size() == 0 ? 0 : index_meta_pages_.rbegin()->first + 1;
   }
 
   static CatalogMeta *NewInstance() { return new CatalogMeta(); }
@@ -43,7 +43,6 @@ class CatalogMeta {
    * Used only for testing
    */
   inline std::map<index_id_t, page_id_t> *GetIndexMetaPages() { return &index_meta_pages_; }
-
   /**
    * Delete index meta data and its meta page.
    */
@@ -76,6 +75,10 @@ class CatalogManager {
 
   ~CatalogManager();
 
+  dberr_t InitCatalogMetaPage(){
+    return FlushCatalogMetaPage();
+  }
+
   dberr_t CreateTable(const std::string &table_name, TableSchema *schema, Transaction *txn, TableInfo *&table_info);
 
   dberr_t GetTable(const std::string &table_name, TableInfo *&table_info);
@@ -84,11 +87,7 @@ class CatalogManager {
 
   dberr_t CreateIndex(const std::string &table_name, const std::string &index_name,
                       const std::vector<std::string> &index_keys, Transaction *txn, IndexInfo *&index_info,
-                      const string &index_type = "bptree");
-
-  dberr_t CreateIndex(const std::string &table_name, const std::string &index_name,
-                      const vector<uint32_t>& key_map, Transaction *txn,
-                      IndexInfo *&index_info, const string& index_type = "bptree");
+                      const string &index_type);
 
   dberr_t GetIndex(const std::string &table_name, const std::string &index_name, IndexInfo *&index_info) const;
 
@@ -125,3 +124,4 @@ class CatalogManager {
 };
 
 #endif  // MINISQL_CATALOG_H
+
