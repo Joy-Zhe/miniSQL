@@ -3,55 +3,7 @@
 #include "common/macros.h"
 #include "storage/table_heap.h"
 
-/**
- * TODO: Student Implement
- */
-//TableIterator::TableIterator() {
-//
-//}
-//
-//TableIterator::TableIterator(const TableIterator &other) {
-//
-//}
-//
-//TableIterator::~TableIterator() {
-//
-//}
-//
-//bool TableIterator::operator==(const TableIterator &itr) const {
-//  return false;
-//}
-//
-//bool TableIterator::operator!=(const TableIterator &itr) const {
-//  return false;
-//}
-//
-//const Row &TableIterator::operator*() {
-//  ASSERT(false, "Not implemented yet.");
-//}
-//
-//Row *TableIterator::operator->() {
-//  return nullptr;
-//}
-//
-//TableIterator &TableIterator::operator=(const TableIterator &itr) noexcept {
-//  ASSERT(false, "Not implemented yet.");
-//}
-//
-//// ++iter
-//TableIterator &TableIterator::operator++() {
-//  return *this;
-//}
-//
-//// iter++
-//TableIterator TableIterator::operator++(int) {
-//  return TableIterator();
-//}
-<<<<<<< HEAD
-TableIterator::TableIterator(TableHeap *table_heap, RowId rid,Transaction*txn)
-=======
 TableIterator::TableIterator(TableHeap *table_heap, RowId rid, Transaction* txn) 
->>>>>>> c8776571441040e84be8bdd8f7202d90b56c03ae
     :table_heap(table_heap),
       row(new Row(rid)),
       txn(txn) {
