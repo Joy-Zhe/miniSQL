@@ -73,10 +73,14 @@ int LeafPage::KeyIndex(const GenericKey *key, const KeyManager &KM) {
  * array offset)
  */
 GenericKey *LeafPage::KeyAt(int index) {
+//  LOG(INFO) << "pairs_off:" << data_;
+//  LOG(INFO) << "index * pair_size:" << index * pair_size;
+//  LOG(INFO) << "key_off:" << key_off;
   return reinterpret_cast<GenericKey *>(pairs_off + index * pair_size + key_off);
 }
 
 void LeafPage::SetKeyAt(int index, GenericKey *key) {
+//  LOG(INFO) << "set key" << key;
   memcpy(pairs_off + index * pair_size + key_off, key, GetKeySize());
 }
 

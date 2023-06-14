@@ -84,7 +84,11 @@ class CatalogManager {
 
   dberr_t CreateIndex(const std::string &table_name, const std::string &index_name,
                       const std::vector<std::string> &index_keys, Transaction *txn, IndexInfo *&index_info,
-                      const string &index_type);
+                      const string &index_type = "bptree");
+
+  dberr_t CreateIndex(const std::string &table_name, const std::string &index_name,
+                      const vector<uint32_t>& key_map, Transaction *txn,
+                      IndexInfo *&index_info, const string& index_type = "bptree");
 
   dberr_t GetIndex(const std::string &table_name, const std::string &index_name, IndexInfo *&index_info) const;
 
