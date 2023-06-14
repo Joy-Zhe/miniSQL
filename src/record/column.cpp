@@ -39,17 +39,21 @@ Column::Column(const Column *other)
 * TODO: Student Implement
 */
 uint32_t Column::SerializeTo(char *buf) const {
-  // replace with your code here
   uint32_t ofs = 0, len;
+
+  //write magic num
   MACH_WRITE_TO(uint32_t, buf, COLUMN_MAGIC_NUM);
   ofs += sizeof(uint32_t);
-  len = name_.size() * sizeof(char);  // bytes of string
-  memcpy(buf + ofs, &len, sizeof(uint32_t));
-  ofs += sizeof(uint32_t);
-  memcpy(buf + ofs, name_.c_str(), len);
-  ofs += len;
-  MACH_WRITE_TO(TypeId, buf + ofs, type_);
-  ofs += sizeof(TypeId);
+  //end write magic num
+
+//  len = name_.size() * sizeof(char);  // bytes of string
+//  memcpy(buf + ofs, &len, sizeof(uint32_t));
+//  ofs += sizeof(uint32_t);
+//  memcpy(buf + ofs, name_.c_str(), len);
+//  ofs += len;
+
+
+  //write len_,table_ind_,nullable_,unique_,type_
   MACH_WRITE_TO(uint32_t, buf + ofs, len_);
   ofs += sizeof(uint32_t);
   MACH_WRITE_TO(uint32_t, buf + ofs, table_ind_);
@@ -58,48 +62,81 @@ uint32_t Column::SerializeTo(char *buf) const {
   ofs += sizeof(bool);
   MACH_WRITE_TO(bool, buf + ofs, unique_);
   ofs += sizeof(bool);
+  MACH_WRITE_TO(TypeId, buf + ofs, type_);
+  ofs += sizeof(TypeId);
+  //end write len_,table_ind_,nullable_,unique_,type_
+
+  //write name.length
+  MACH_WRITE_UINT32(buf + ofs, name_.length());
+  ofs += sizeof(uint32_t);
+  //end write name.length
+
+  //write name
+  MACH_WRITE_STRING(buf + ofs, name_);
+  ofs += name_.length();
+  //end write name
+
   return ofs;
-  return 0;
 }
 
 /**
  * TODO: Student Implement
  */
 uint32_t Column::GetSerializedSize() const {
-  // replace with your code here
-  return 4 * sizeof(uint32_t) + name_.size() * sizeof(char) + sizeof(TypeId) + 2 * sizeof(bool);
-  //return 0;
+  //return 4 * sizeof(uint32_t) + name_.size() * sizeof(char) + sizeof(TypeId) + 2 * sizeof(bool);
+    return 4 * sizeof(uint32_t) + sizeof(TypeId) + 2 * sizeof(bool) + name_.length();
 }
 
 /**
  * TODO: Student Implement
  */
 uint32_t Column::DeserializeFrom(char *buf, Column *&column) {
-  // replace with your code here
-  auto magic_num = MACH_READ_FROM(uint32_t, buf);
+  uint32_t ofs = 0;
+
+  //read magic num
+  uint32_t magic_num = MACH_READ_FROM(uint32_t, buf);
   ASSERT(magic_num == COLUMN_MAGIC_NUM, "Column magic num error.");
-  uint32_t ofs = sizeof(uint32_t);
-  auto len = MACH_READ_UINT32(buf + ofs);
   ofs += sizeof(uint32_t);
-  char tmp[len / sizeof(char) + 1];
-  memset(tmp, '\0', sizeof(tmp));
-  memcpy(tmp, buf + ofs, len);
-  auto name_(tmp);
-  ofs += len;
-  auto type_ = MACH_READ_FROM(TypeId, buf + ofs);
+  //end read magic num
+
+//  auto len = MACH_READ_UINT32(buf + ofs);
+//  ofs += sizeof(uint32_t);
+//  char tmp[len / sizeof(char) + 1];
+//  memset(tmp, '\0', sizeof(tmp));
+//  memcpy(tmp, buf + ofs, len);
+//  auto name_(tmp);
+//  ofs += len;
+
+
+  //read len_,table_ind_,nullable_,unique_,type_
+  uint32_t len_read = MACH_READ_FROM(TypeId, buf + ofs);
+  ofs += sizeof(uint32_t);
+  uint32_t table_ind_read = MACH_READ_FROM(uint32_t, buf + ofs);
+  ofs += sizeof(uint32_t);
+  bool nullable_read = MACH_READ_FROM(bool, buf + ofs);
+  ofs += sizeof(bool);
+  bool unique_read = MACH_READ_FROM(bool, buf + ofs);
+  ofs += sizeof(bool);
+  TypeId type_read = MACH_READ_FROM(TypeId, buf + ofs);
   ofs += sizeof(TypeId);
-  auto len_ = MACH_READ_FROM(TypeId, buf + ofs);
+  //end read len_,table_ind_,nullable_,unique_,type_
+
+  //read name.length
+  uint32_t name_length_read = MACH_READ_UINT32(buf + ofs);
   ofs += sizeof(uint32_t);
-  auto table_ind_ = MACH_READ_FROM(uint32_t, buf + ofs);
-  ofs += sizeof(uint32_t);
-  auto nullable_ = MACH_READ_FROM(bool, buf + ofs);
-  ofs += sizeof(bool);
-  auto unique_ = MACH_READ_FROM(bool, buf + ofs);
-  ofs += sizeof(bool);
-  if (type_ != kTypeChar)  // not char type
-    column = new Column(name_, type_, table_ind_, nullable_, unique_);
+  //end read name.length
+
+  //read name
+  char *temp = new char[name_length_read]();
+  memcpy(temp, buf + ofs, name_length_read);
+  std::string column_name(temp);
+  ofs = ofs + name_length_read;
+  //end read name
+
+  if (type_read != kTypeChar)  // not char type
+    column = new Column(column_name, type_read, table_ind_read, nullable_read, unique_read);
   else
-    column = new Column(name_, type_, len_, table_ind_, nullable_, unique_);
+    column = new Column(column_name, type_read, len_read, table_ind_read, nullable_read, unique_read);
   return ofs;
 
 }

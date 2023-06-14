@@ -47,7 +47,7 @@
 //TableIterator TableIterator::operator++(int) {
 //  return TableIterator();
 //}
-TableIterator::TableIterator(TableHeap *table_heap, RowId rid/*,Transaction*txn*/)
+TableIterator::TableIterator(TableHeap *table_heap, RowId rid,Transaction*txn)
     :table_heap(table_heap),
       row(new Row(rid)),
       txn(txn) {

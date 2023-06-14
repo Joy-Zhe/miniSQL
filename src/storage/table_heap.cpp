@@ -14,14 +14,17 @@ bool TableHeap::InsertTuple(Row &row, Transaction *txn) {
     for(;pid != INVALID_PAGE_ID;){
       //std::cout<<pid<<std::endl;
       page = reinterpret_cast<TablePage *>(buffer_pool_manager_->FetchPage(pid));//fetchpage atomatically pin
-      //if(page == nullptr) break;//jy added
+      if(page == nullptr) break;//jy added
       page->WLatch();
       flag=page->InsertTuple(row,schema_,txn,lock_manager_,log_manager_);
       page->WUnlatch();
-      if(flag) return true;
+      if(flag) {
+        buffer_pool_manager_->UnpinPage(page->GetTablePageId(),true);//GetPageId-->GetTablePageId added
+        return true;
+      }
       pid=page->GetNextPageId();
       if(pid == INVALID_PAGE_ID) break;
-      //buffer_pool_manager_->UnpinPage(page->GetPageId(),false);// added
+      //buffer_pool_manager_->UnpinPage(page->GetPageId(),true);// added
       delete page;page = nullptr;
     }
     //buffer_pool_manager_->UnpinPage(page->GetPageId(),false);// added
@@ -29,70 +32,21 @@ bool TableHeap::InsertTuple(Row &row, Transaction *txn) {
     if(pid == INVALID_PAGE_ID) return false;//new page fails
     //new page and insert tuple
     auto Npage = reinterpret_cast<TablePage *>(buffer_pool_manager_->FetchPage(pid));
-    //if(Npage == nullptr) return false;// added
+    if(Npage == nullptr) return false;// added
     Npage->WLatch();
     if(page!= nullptr) page->WLatch();// comment
     //initialize Npage
     if(page!= nullptr)
-      Npage->Init(pid,page->GetPageId(),log_manager_,txn);//PageId --> tablePageId
+      Npage->Init(pid,page->GetTablePageId(),log_manager_,txn);//PageId --> tablePageId
     else
       Npage->Init(pid,INVALID_PAGE_ID,log_manager_,txn);
-    //end initialize Npage
+    //end initialize N page
     Npage->InsertTuple(row,schema_,txn,lock_manager_,log_manager_);
     if(page!= nullptr)  page->SetNextPageId(pid);
     Npage->WUnlatch();
     if(page!= nullptr) page->WUnlatch();// comment
-    //buffer_pool_manager_->UnpinPage(Npage->GetPageId(),false);// added 
+    buffer_pool_manager_->UnpinPage(pid, true);//Npage->GetPageId() --> pid     added
     return true;
-
-//    buffer_pool_manager_->NewPage(pid);
-//    if(pid == -1) return false;
-//    auto Npage = reinterpret_cast<TablePage *>(buffer_pool_manager_->FetchPage(pid));
-//    Npage->WLatch();
-//    if(page!= nullptr) page->WLatch();
-//    if(page!= nullptr) Npage->Init(pid,page->GetPageId(),log_manager_,txn);
-//    else Npage->Init(pid,INVALID_PAGE_ID,log_manager_,txn);
-//    Npage->InsertTuple(row,schema_,txn,lock_manager_,log_manager_);
-//    if(page!= nullptr) page->SetNextPageId(pid);
-//    Npage->WUnlatch();
-//    if(page!= nullptr) page->WUnlatch();
-//    return true;
-
-
-//    uint32_t serialized_size = row.GetSerializedSize(schema_);
-//    if (serialized_size > TablePage::SIZE_MAX_ROW) {  // larger than one page size
-//      return false;
-//    }
-//    auto cur_page = (TablePage *)buffer_pool_manager_->FetchPage(first_page_id_);
-//    if (cur_page == nullptr) {
-//      return false;
-//    }
-//    TablePage *new_page;
-//    page_id_t next_page_id_;
-//    while (!cur_page->InsertTuple(row, schema_, txn, lock_manager_, log_manager_)) {
-//      next_page_id_ = cur_page->GetNextPageId();
-//      if (next_page_id_ != INVALID_PAGE_ID) {  // next page valid
-//        buffer_pool_manager_->UnpinPage(cur_page->GetTablePageId(), false);
-//        cur_page = (TablePage *)buffer_pool_manager_->FetchPage(next_page_id_);  // get next
-//      }
-//      // no valid, create new one
-//      else {
-//        //      buffer_pool_manager_->UnpinPage(cur_page->GetTablePageId(), false);
-//        new_page = (TablePage *)buffer_pool_manager_->NewPage(next_page_id_);
-//        if (new_page == nullptr) {
-//          buffer_pool_manager_->UnpinPage(cur_page->GetTablePageId(), false);
-//          return false;
-//        } else {
-//          new_page->Init(next_page_id_, cur_page->GetTablePageId(), log_manager_, txn);
-//          cur_page->SetNextPageId(next_page_id_);  // update next page id
-//          cur_page = new_page;
-//          buffer_pool_manager_->UnpinPage(new_page->GetTablePageId(), true);
-//        }
-//      }
-//    }
-//    // dirty
-//    buffer_pool_manager_->UnpinPage(cur_page->GetTablePageId(), true);
-//    return true;
 }
 
 bool TableHeap::MarkDelete(const RowId &rid, Transaction *txn) {
@@ -151,9 +105,6 @@ void TableHeap::RollbackDelete(const RowId &rid, Transaction *txn) {
   buffer_pool_manager_->UnpinPage(page->GetTablePageId(), true);
 }
 
-/**
- * TODO: Student Implement
- */
 bool TableHeap::GetTuple(Row *row, Transaction *txn) {
   auto page = reinterpret_cast<TablePage *>(buffer_pool_manager_->FetchPage(row->GetRowId().GetPageId()));
   if (page == nullptr) return false;
