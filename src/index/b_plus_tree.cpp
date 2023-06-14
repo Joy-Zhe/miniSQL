@@ -68,8 +68,9 @@ bool BPlusTree::GetValue(const GenericKey *key, std::vector<RowId> &result, Tran
   bool found = node->Lookup(key, v, processor_);
   if (node->Lookup(key, v, processor_)) {
     result.push_back(v);
-    buffer_pool_manager_->UnpinPage(node->GetPageId(), false);
+//    buffer_pool_manager_->UnpinPage(node->GetPageId(), false);
   }
+  buffer_pool_manager_->UnpinPage(node->GetPageId(), false);
   return found;
 }
 
@@ -286,7 +287,6 @@ void BPlusTree::Remove(const GenericKey *key, Transaction *transaction) {
  */
 template <typename N>
 bool BPlusTree::CoalesceOrRedistribute(N *&node, Transaction *transaction) {
-  LOG(INFO) << "CoalesceOrRedistribute called.";
 //  if (node->IsRootPage()) {
 //    bool f = AdjustRoot(node);
 //    if(!f)
@@ -489,7 +489,6 @@ void BPlusTree::Redistribute(InternalPage *neighbor_node, InternalPage *node, in
  * happened
  */
 bool BPlusTree::AdjustRoot(BPlusTreePage *old_root_node) {
-  LOG(INFO) << "AdjustRoot called.";
   if (old_root_node->IsLeafPage() && old_root_node->GetSize() == 0) {
     root_page_id_ = INVALID_PAGE_ID;
     UpdateRootPageId(0);
@@ -613,9 +612,11 @@ void BPlusTree::UpdateRootPageId(int insert_record) {
   if (insert_record) {
     // Insert a new record into the index roots page
     roots_page->Insert(index_id_, root_page_id_);
+//    LOG(INFO) << index_id_;
   } else {
     // Update the root page ID directly
     roots_page->Update(index_id_, root_page_id_);
+    LOG(INFO) << index_id_;
   }
 
   // used

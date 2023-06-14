@@ -63,6 +63,7 @@ class BPlusTree {
     Page *root_page = buffer_pool_manager_->FetchPage(root_page_id_);
     auto *node = reinterpret_cast<BPlusTreePage *>(root_page);
     ToGraph(node, buffer_pool_manager_, out);
+    buffer_pool_manager_->UnpinPage(root_page_id_, true);
     out << "}" << std::endl;
   }
 

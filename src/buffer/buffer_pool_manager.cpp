@@ -27,6 +27,7 @@ Page *BufferPoolManager::FetchPage(page_id_t page_id) {
   // 2.     If R is dirty, write it back to the disk.
   // 3.     Delete R from the page table and insert P.
   // 4.     Update P's metadata, read in the page content from disk, and then return a pointer to P.
+//  LOG(INFO) << "page_id:" << page_id;
   auto temp = page_table_.find(page_id);
   if (temp != page_table_.end()) {
     // exists, pin it and return it immediately.

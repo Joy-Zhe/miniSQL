@@ -147,7 +147,7 @@ void InternalPage::MoveHalfTo(InternalPage *recipient, BufferPoolManager *buffer
  *
  */
 void InternalPage::CopyNFrom(void *src, int size, BufferPoolManager *buffer_pool_manager) {
-  PairCopy(PairPtrAt(GetSize()), src, size);
+  PairCopy(PairPtrAt(GetSize() /** pair_size*/), src, size);
   for (int i = GetSize(); i < GetSize() + size; i++) {
     Page *child_page = buffer_pool_manager->FetchPage(ValueAt(i));
     BPlusTreePage *child_node = reinterpret_cast<BPlusTreePage *>(child_page->GetData());
@@ -181,6 +181,7 @@ void InternalPage::Remove(int index) {
  * NOTE: only call this method within AdjustRoot()(in b_plus_tree.cpp)
  */
 page_id_t InternalPage::RemoveAndReturnOnlyChild() {
+  Remove(1);
   SetSize(0);
   return ValueAt(0);
 }
@@ -214,8 +215,11 @@ void InternalPage::MoveAllTo(InternalPage *recipient, GenericKey *middle_key, Bu
 //  // changed, mark dirty
 //  buffer_pool_manager->UnpinPage(recipient->GetPageId(), true);
 //  buffer_pool_manager->UnpinPage(GetPageId(), true);
+  LOG(INFO) << "MoveAllTo";
   SetKeyAt(0, middle_key);
   recipient->CopyNFrom(PairPtrAt(0), GetSize(), buffer_pool_manager);
+  buffer_pool_manager->UnpinPage(GetPageId(),true);
+  buffer_pool_manager->UnpinPage(recipient->GetPageId(),true);
   SetSize(0);
 }
 
@@ -232,6 +236,7 @@ void InternalPage::MoveAllTo(InternalPage *recipient, GenericKey *middle_key, Bu
  */
 void InternalPage::MoveFirstToEndOf(InternalPage *recipient, GenericKey *middle_key,
                                     BufferPoolManager *buffer_pool_manager) {
+  LOG(INFO) << "MoveFirstToEndOf";
 //  GenericKey *key = KeyAt(0);
 //  page_id_t value = ValueAt(0);
 //
@@ -245,6 +250,7 @@ void InternalPage::MoveFirstToEndOf(InternalPage *recipient, GenericKey *middle_
   BPlusTreeInternalPage *parent_page = reinterpret_cast<BPlusTreeInternalPage *>(parent->GetData());
   parent_page->SetKeyAt(parent_page->ValueIndex(GetPageId()), KeyAt(0));
   buffer_pool_manager->UnpinPage(parent->GetPageId(), true);
+  buffer_pool_manager->UnpinPage(GetPageId(), true);
 }
 
 /* Append an entry at the end.
@@ -264,6 +270,7 @@ void InternalPage::CopyLastFrom(GenericKey *key, const page_id_t value, BufferPo
 //      buffer_pool_manager->UnpinPage(page_id, true);
 //    }
 //  }
+  LOG(INFO) << "CopyLastFrom";
   SetKeyAt(GetSize(), key);
   SetValueAt(GetSize(), value);
   Page *page = buffer_pool_manager->FetchPage(ValueAt(GetSize()));
@@ -295,6 +302,11 @@ void InternalPage::MoveLastToFrontOf(InternalPage *recipient, GenericKey *middle
 //      buffer_pool_manager->UnpinPage(value, true);
 //    }
 //  }
+  LOG(INFO) << "MoveLastToFrontOf";
+  Page * page = buffer_pool_manager->FetchPage(GetParentPageId());
+  InternalPage *parent = reinterpret_cast<InternalPage *>(page->GetData());
+  parent->SetKeyAt(ValueIndex(recipient->GetPageId()), KeyAt(GetSize()-1));
+  buffer_pool_manager->UnpinPage(GetParentPageId(),true);
   recipient->SetKeyAt(0, middle_key);
   recipient->CopyFirstFrom(ValueAt(GetSize() - 1), buffer_pool_manager);
   IncreaseSize(-1);
@@ -321,6 +333,7 @@ void InternalPage::CopyFirstFrom(const page_id_t value, BufferPoolManager *buffe
 //    }
 //  }
 //  IncreaseSize(1);
+  LOG(INFO) << "CopyFirstFrom";
   PairCopy(PairPtrAt(1), PairPtrAt(0), GetSize()); // spare room
   SetValueAt(0, value); //no need to replace invalid key
   Page *page = buffer_pool_manager->FetchPage(ValueAt(0));
