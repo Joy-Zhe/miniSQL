@@ -73,6 +73,7 @@ TEST(TupleTest, FieldSerializeDeserializeTest) {
     delete df;
     df = nullptr;
   }
+  
 }
 
 TEST(TupleTest, RowTest) {
@@ -100,4 +101,5 @@ TEST(TupleTest, RowTest) {
   }
   ASSERT_TRUE(table_page.MarkDelete(row.GetRowId(), nullptr, nullptr, nullptr));
   table_page.ApplyDelete(row.GetRowId(), nullptr, nullptr);
+  
 }

@@ -15,7 +15,7 @@ class IndexMetadata {
 
  public:
   static IndexMetadata *Create(const index_id_t index_id, const std::string &index_name, const table_id_t table_id,
-                               const std::vector<uint32_t> &key_map);
+                               const std::vector<uint32_t> &key_map, const std::string &index_type);
 
   uint32_t SerializeTo(char *buf) const;
 
@@ -33,11 +33,12 @@ class IndexMetadata {
 
   inline index_id_t GetIndexId() const { return index_id_; }
 
+  inline std::string GetIndexType() const { return index_type_; }
  private:
   IndexMetadata() = delete;
 
   explicit IndexMetadata(const index_id_t index_id, const std::string &index_name, const table_id_t table_id,
-                         const std::vector<uint32_t> &key_map);
+                         const std::vector<uint32_t> &key_map, const std::string &index_type);
 
  private:
   static constexpr uint32_t INDEX_METADATA_MAGIC_NUM = 344528;
@@ -45,6 +46,7 @@ class IndexMetadata {
   std::string index_name_;
   table_id_t table_id_;
   std::vector<uint32_t> key_map_; /** The mapping of index key to tuple key */
+  std::string index_type_;
 };
 
 /**
@@ -63,25 +65,23 @@ class IndexInfo {
 /**
  * TODO: Student Implement
  */
-  void Init(IndexMetadata *meta_data, TableInfo *table_info, BufferPoolManager *buffer_pool_manager,
-            const string &index_type = "bptree") {
+  void Init(IndexMetadata *meta_data, TableInfo *table_info, BufferPoolManager *buffer_pool_manager) {
     // Step1: init index metadata and table info
-    meta_data_ = meta_data;
-
     // Step2: mapping index key to key schema
-    key_schema_ = Schema::ShallowCopySchema(table_info->GetSchema(), meta_data_->GetKeyMapping());
-
     // Step3: call CreateIndex to create the index
-    index_ = CreateIndex(buffer_pool_manager, index_type);
-
-    // ASSERT(false, "Not Implemented yet.");
+    meta_data_ = meta_data;
+    key_schema_ = table_info->GetSchema()->ShallowCopySchema(table_info->GetSchema(), meta_data->GetKeyMapping());
+    index_ = CreateIndex(buffer_pool_manager, meta_data->GetIndexType());
   }
 
   inline Index *GetIndex() { return index_; }
 
+  std::string GetIndexType() { return meta_data_->GetIndexType(); }
+
   std::string GetIndexName() { return meta_data_->GetIndexName(); }
 
   IndexSchema *GetIndexKeySchema() { return key_schema_; }
+
 
  private:
   explicit IndexInfo() : meta_data_{nullptr}, index_{nullptr}, key_schema_{nullptr} {}

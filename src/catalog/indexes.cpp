@@ -1,20 +1,18 @@
 #include "catalog/indexes.h"
 
-#include <utility>
-
 IndexMetadata::IndexMetadata(const index_id_t index_id, const std::string &index_name, const table_id_t table_id,
-                             const std::vector<uint32_t> &key_map)
-    : index_id_(index_id), index_name_(index_name), table_id_(table_id), key_map_(key_map) {}
+                             const std::vector<uint32_t> &key_map, const std::string &index_type)
+    : index_id_(index_id), index_name_(index_name), table_id_(table_id), key_map_(key_map), index_type_(index_type) {}
 
 IndexMetadata *IndexMetadata::Create(const index_id_t index_id, const string &index_name, const table_id_t table_id,
-                                     const vector<uint32_t> &key_map) {
-  return new IndexMetadata(index_id, index_name, table_id, key_map);
+                                     const vector<uint32_t> &key_map, const string &index_type) {
+  return new IndexMetadata(index_id, index_name, table_id, key_map, index_type);
 }
 
 uint32_t IndexMetadata::SerializeTo(char *buf) const {
     char *p = buf;
     uint32_t ofs = GetSerializedSize();
-    // ASSERT(ofs <= PAGE_SIZE, "Failed to serialize index info.");
+    ASSERT(ofs <= PAGE_SIZE, "Failed to serialize index info.");
     // magic num
     MACH_WRITE_UINT32(buf, INDEX_METADATA_MAGIC_NUM);
     buf += 4;
@@ -37,7 +35,13 @@ uint32_t IndexMetadata::SerializeTo(char *buf) const {
         MACH_WRITE_UINT32(buf, col_index);
         buf += 4;
     }
-    // ASSERT(buf - p == ofs, "Unexpected serialize size.");
+    // index type
+    MACH_WRITE_UINT32(buf, index_type_.length());
+    buf += 4;
+    MACH_WRITE_STRING(buf, index_type_);
+    buf += index_type_.length();
+
+    ASSERT(buf - p == ofs, "Unexpected serialize size.");
     return ofs;
 }
 
@@ -45,21 +49,21 @@ uint32_t IndexMetadata::SerializeTo(char *buf) const {
  * TODO: Student Implement
  */
 uint32_t IndexMetadata::GetSerializedSize() const {
-  return 4 + 4 + 4 +
-           index_name_.length() +
-         4 + 4 +
-         4 * key_map_.size();
+    /* the size of INDEX_METADATA_MAGIC_NUM, index_id_, index_name_.length(), index_name_, table_id_ and key_map_,size() and key_map_*/
+    uint32_t len = index_name_.length() + index_type_.length() + key_map_.size() * sizeof(uint32_t);
+
+    return 6 * sizeof(uint32_t) + len;
 }
 
 uint32_t IndexMetadata::DeserializeFrom(char *buf, IndexMetadata *&index_meta) {
     if (index_meta != nullptr) {
-
+      //  LOG(WARNING) << "Pointer object index info is not null in table info deserialize." << std::endl;
     }
     char *p = buf;
     // magic num
     uint32_t magic_num = MACH_READ_UINT32(buf);
     buf += 4;
-    // ASSERT(magic_num == INDEX_METADATA_MAGIC_NUM, "Failed to deserialize index info.");
+    ASSERT(magic_num == INDEX_METADATA_MAGIC_NUM, "Failed to deserialize index info.");
     // index id
     index_id_t index_id = MACH_READ_FROM(index_id_t, buf);
     buf += 4;
@@ -81,8 +85,13 @@ uint32_t IndexMetadata::DeserializeFrom(char *buf, IndexMetadata *&index_meta) {
         buf += 4;
         key_map.push_back(key_index);
     }
+    // index type
+    len = MACH_READ_UINT32(buf);
+    buf += 4;
+    std::string index_type(buf, len);
+    buf += len;
     // allocate space for index meta data
-    index_meta = new IndexMetadata(index_id, index_name, table_id, key_map);
+    index_meta = new IndexMetadata(index_id, index_name, table_id, key_map, index_type);
     return buf - p;
 }
 
@@ -104,7 +113,7 @@ Index *IndexInfo::CreateIndex(BufferPoolManager *buffer_pool_manager, const stri
     else if (max_size <= 248)
       max_size = 256;
     else {
-
+     // LOG(ERROR) << "GenericKey size is too large";
       return nullptr;
     }
   } else {

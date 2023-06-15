@@ -124,4 +124,3 @@ class CatalogManager {
 };
 
 #endif  // MINISQL_CATALOG_H
-
