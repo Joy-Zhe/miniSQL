@@ -43,8 +43,10 @@ class ExecutorTest : public ::testing::Test {
     std::vector<Column *> columns = {new Column("id", TypeId::kTypeInt, 0, false, false),
                                      new Column("name", TypeId::kTypeChar, 64, 1, true, false),
                                      new Column("account", TypeId::kTypeFloat, 2, true, false)};
-    auto schema = std::make_shared<Schema>(columns);
-    catalog_01->CreateTable("table-1", schema.get(), txn_, table_info);
+//    auto schema = std::make_shared<Schema>(columns);
+    auto schema = new Schema(columns);
+//    catalog_01->CreateTable("table-1", schema.get(), txn_, table_info);
+    catalog_01->CreateTable("table-1", schema, txn_, table_info);
     TableHeap *table_heap = table_info->GetTableHeap();
     for (int i = 0; i < 1000; i++) {
       int32_t len = RandomUtils::RandomInt(0, 64);
@@ -57,9 +59,10 @@ class ExecutorTest : public ::testing::Test {
       ASSERT_TRUE(table_heap->InsertTuple(row, nullptr));
       delete[] characters;
     }
+
+    db_test_->bpm_->FlushPage(3);
     // Create an executor context for our executors
     exec_ctx_ = std::make_unique<ExecuteContext>(txn_, db_test_->catalog_mgr_, db_test_->bpm_);
-
     // Construct the executor engine for the test
     execution_engine_ = std::make_unique<ExecuteEngine>();
   }

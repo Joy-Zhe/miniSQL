@@ -33,6 +33,8 @@ class TableMetadata {
 
   inline Schema *GetSchema() const { return schema_; }
 
+  std::vector<std::string> primary_key_;
+
  private:
   TableMetadata() = delete;
 
@@ -73,6 +75,7 @@ class TableInfo {
 
   inline page_id_t GetRootPageId() const { return table_meta_->root_page_id_; }
 
+  inline TableMetadata *GetTableMetaData () const { return table_meta_; }
  private:
   explicit TableInfo(){};
 

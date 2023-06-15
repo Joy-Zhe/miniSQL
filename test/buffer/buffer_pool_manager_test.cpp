@@ -5,8 +5,11 @@
 #include <string>
 
 #include "gtest/gtest.h"
+#include "glog/logging.h"
 
 TEST(BufferPoolManagerTest, BinaryDataTest) {
+
+  
   const std::string db_name = "bpm_test.db";
   const size_t buffer_pool_size = 10;
 
@@ -24,7 +27,6 @@ TEST(BufferPoolManagerTest, BinaryDataTest) {
   // Scenario: The buffer pool is empty. We should be able to create a new page.
   ASSERT_NE(nullptr, page0);
   EXPECT_EQ(0, page_id_temp);
-
   char random_binary_data[PAGE_SIZE];
   // Generate random binary data
   for (char &i : random_binary_data) {
@@ -42,14 +44,15 @@ TEST(BufferPoolManagerTest, BinaryDataTest) {
   // Scenario: We should be able to create new pages until we fill up the buffer pool.
   for (size_t i = 1; i < buffer_pool_size; ++i) {
     EXPECT_NE(nullptr, bpm->NewPage(page_id_temp));
+    EXPECT_EQ(false,bpm->IsPageFree(page_id_temp));
     EXPECT_EQ(i, page_id_temp);
   }
+
 
   // Scenario: Once the buffer pool is full, we should not be able to create any new pages.
   for (size_t i = buffer_pool_size; i < buffer_pool_size * 2; ++i) {
     EXPECT_EQ(nullptr, bpm->NewPage(page_id_temp));
   }
-
   // Scenario: After unpinning pages {0, 1, 2, 3, 4} we should be able to create 5 new pages
   for (int i = 0; i < 5; ++i) {
     EXPECT_EQ(true, bpm->UnpinPage(i, true));

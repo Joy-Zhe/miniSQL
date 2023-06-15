@@ -45,10 +45,9 @@ TEST(BPlusTreeTests, BPlusTreeIndexSimpleTest) {
                               Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)};
     Row row(fields);
     RowId rid(1000, i);
-//    LOG(INFO) << "INSERT_ENTRY TEST.";
     ASSERT_EQ(DB_SUCCESS, index->InsertEntry(row, rid, nullptr));
+
   }
-  cout << "PASSED INSERT_ENTRY TEST." << endl;
   // Test Scan
   std::vector<RowId> ret;
   for (int i = 0; i < 10; i++) {
@@ -56,8 +55,6 @@ TEST(BPlusTreeTests, BPlusTreeIndexSimpleTest) {
                               Field(TypeId::kTypeChar, const_cast<char *>("minisql"), 7, true)};
     Row row(fields);
     RowId rid(1000, i);
-//    cout << index->ScanKey(row, ret, nullptr) << endl;
-//    LOG(INFO) << "SCAN_KEY TEST.";
     ASSERT_EQ(DB_SUCCESS, index->ScanKey(row, ret, nullptr));
     ASSERT_EQ(rid.Get(), ret[i].Get());
   }
