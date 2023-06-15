@@ -6,39 +6,6 @@
 
 static string db_file_name = "catalog_test.db";
 
-TEST(CatalogTest, CatalogMetaTest) {
-  char *buf = new char[PAGE_SIZE];
-  CatalogMeta *meta = CatalogMeta::NewInstance();
-  // fill data
-  const int table_nums = 16;
-  const int index_nums = 24;
-  for (auto i = 0; i < table_nums; i++) {
-    meta->GetTableMetaPages()->emplace(i, RandomUtils::RandomInt(0, 1 << 16));
-  }
-  meta->GetTableMetaPages()->emplace(table_nums, INVALID_PAGE_ID);
-  for (auto i = 0; i < index_nums; i++) {
-    meta->GetIndexMetaPages()->emplace(i, RandomUtils::RandomInt(0, 1 << 16));
-  }
-  meta->GetIndexMetaPages()->emplace(index_nums, INVALID_PAGE_ID);
-  // serialize
-  meta->SerializeTo(buf);
-  // deserialize
-  CatalogMeta *other = CatalogMeta::DeserializeFrom(buf);
-  ASSERT_NE(nullptr, other);
-  ASSERT_EQ(table_nums + 1, other->GetTableMetaPages()->size());
-  ASSERT_EQ(index_nums + 1, other->GetIndexMetaPages()->size());
-  ASSERT_EQ(INVALID_PAGE_ID, other->GetTableMetaPages()->at(table_nums));
-  ASSERT_EQ(INVALID_PAGE_ID, other->GetIndexMetaPages()->at(index_nums));
-  for (auto i = 0; i < table_nums; i++) {
-    EXPECT_EQ(meta->GetTableMetaPages()->at(i), other->GetTableMetaPages()->at(i));
-  }
-  for (auto i = 0; i < index_nums; i++) {
-    EXPECT_EQ(meta->GetIndexMetaPages()->at(i), other->GetIndexMetaPages()->at(i));
-  }
-  delete meta;
-  delete other;
-}
-
 TEST(CatalogTest, CatalogIndexTest) {
   /** Stage 1: Testing simple operation */
   auto db_01 = new DBStorageEngine(db_file_name, true);
@@ -105,6 +72,39 @@ TEST(CatalogTest, CatalogIndexTest) {
     ASSERT_EQ(rid.Get(), ret_02[i].Get());
   }
   delete db_02;
+}
+
+TEST(CatalogTest, CatalogMetaTest) {
+  char *buf = new char[PAGE_SIZE];
+  CatalogMeta *meta = CatalogMeta::NewInstance();
+  // fill data
+  const int table_nums = 16;
+  const int index_nums = 24;
+  for (auto i = 0; i < table_nums; i++) {
+    meta->GetTableMetaPages()->emplace(i, RandomUtils::RandomInt(0, 1 << 16));
+  }
+  meta->GetTableMetaPages()->emplace(table_nums, INVALID_PAGE_ID);
+  for (auto i = 0; i < index_nums; i++) {
+    meta->GetIndexMetaPages()->emplace(i, RandomUtils::RandomInt(0, 1 << 16));
+  }
+  meta->GetIndexMetaPages()->emplace(index_nums, INVALID_PAGE_ID);
+  // serialize
+  meta->SerializeTo(buf);
+  // deserialize
+  CatalogMeta *other = CatalogMeta::DeserializeFrom(buf);
+  ASSERT_NE(nullptr, other);
+  ASSERT_EQ(table_nums + 1, other->GetTableMetaPages()->size());
+  ASSERT_EQ(index_nums + 1, other->GetIndexMetaPages()->size());
+  ASSERT_EQ(INVALID_PAGE_ID, other->GetTableMetaPages()->at(table_nums));
+  ASSERT_EQ(INVALID_PAGE_ID, other->GetIndexMetaPages()->at(index_nums));
+  for (auto i = 0; i < table_nums; i++) {
+    EXPECT_EQ(meta->GetTableMetaPages()->at(i), other->GetTableMetaPages()->at(i));
+  }
+  for (auto i = 0; i < index_nums; i++) {
+    EXPECT_EQ(meta->GetIndexMetaPages()->at(i), other->GetIndexMetaPages()->at(i));
+  }
+  delete meta;
+  delete other;
 }
 
 TEST(CatalogTest, CatalogTableTest) {
