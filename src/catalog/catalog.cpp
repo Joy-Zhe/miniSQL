@@ -97,7 +97,7 @@ CatalogMeta *CatalogMeta::DeserializeFrom(char *buf) {
  * TODO: Student Implement
  */
 uint32_t CatalogMeta::GetSerializedSize() const {
-    /* the size of CATALOG_METADATA_MAGIC_NUM, table_meta_pages_.size(), table_meta_pages_, index_meta_pages_.size() and index_meta_pages_*/
+
     uint32_t table_meta_len = table_meta_pages_.size() * sizeof(uint32_t) * 2;
     uint32_t index_meta_len = index_meta_pages_.size() * sizeof(uint32_t) * 2;
     return 3 * sizeof(uint32_t) + table_meta_len + index_meta_len + 4;
@@ -112,24 +112,26 @@ CatalogManager::CatalogManager(BufferPoolManager *buffer_pool_manager, LockManag
                                LogManager *log_manager, bool init)
     : buffer_pool_manager_(buffer_pool_manager), lock_manager_(lock_manager), log_manager_(log_manager) {
     /* init */
-    if(init){
+    if(init)
+    {
         catalog_meta_ = new CatalogMeta();
-//        lock_manager_ = nullptr;
-//        log_manager_ = nullptr;
+
         buffer_pool_manager_ = buffer_pool_manager;
         next_table_id_ = catalog_meta_->GetNextTableId();
         next_index_id_ = catalog_meta_->GetNextIndexId();
         InitCatalogMetaPage();
     }
     /* no init */
-    else {
+    else
+    {
         if (buffer_pool_manager->IsPageFree(CATALOG_META_PAGE_ID) ||
-            buffer_pool_manager->IsPageFree(INDEX_ROOTS_PAGE_ID)) {
+            buffer_pool_manager->IsPageFree(INDEX_ROOTS_PAGE_ID))
+        {
             exit(1);
         }
         //Fetch the catalog meta page and deserialize it
         Page *catalog_meta_page = buffer_pool_manager->FetchPage(CATALOG_META_PAGE_ID);
-//        Page *index_meta_page = buffer_pool_manager->FetchPage(INDEX_ROOTS_PAGE_ID);
+
         catalog_meta_ = catalog_meta_->DeserializeFrom(catalog_meta_page->GetData());
         next_table_id_ = catalog_meta_->GetNextTableId();
         next_index_id_ = catalog_meta_->GetNextIndexId();
@@ -137,15 +139,19 @@ CatalogManager::CatalogManager(BufferPoolManager *buffer_pool_manager, LockManag
         buffer_pool_manager_->UnpinPage(CATALOG_META_PAGE_ID, true);
 
         //load the tables and indexes
-        for (auto &iter: catalog_meta_->table_meta_pages_) {
+        for (auto &iter: catalog_meta_->table_meta_pages_)
+        {
             dberr_t result = LoadTable(iter.first, iter.second);
-            if(result != DB_SUCCESS){
+            if(result != DB_SUCCESS)
+            {
                 exit(1);
             }
         }
-        for(auto &iter: catalog_meta_->index_meta_pages_) {
+        for(auto &iter: catalog_meta_->index_meta_pages_)
+        {
             dberr_t result = LoadIndex(iter.first, iter.second);
-            if(result != DB_SUCCESS){
+            if(result != DB_SUCCESS)
+            {
                 exit(1);
             }
         }
@@ -172,8 +178,8 @@ dberr_t CatalogManager::CreateTable(const string &table_name, TableSchema *schem
                                     Transaction *txn, TableInfo *&table_info) {
   // ASSERT(false, "Not Implemented yet");
   //if has been created
-  if(table_names_.find(table_name) != table_names_.end()){
-      // LOG(WARNING) << "DB_TABLE_ALREADY_EXIST";
+  if(table_names_.find(table_name) != table_names_.end())
+  {
       return DB_TABLE_ALREADY_EXIST;
   }
   //init the table_heap_root page and id
@@ -200,7 +206,6 @@ dberr_t CatalogManager::CreateTable(const string &table_name, TableSchema *schem
   FlushCatalogMetaPage();
 
   return DB_SUCCESS;
-//  return DB_FAILED;
 }
 
 /**
@@ -209,13 +214,14 @@ dberr_t CatalogManager::CreateTable(const string &table_name, TableSchema *schem
 dberr_t CatalogManager::GetTable(const string &table_name, TableInfo *&table_info) {
   // ASSERT(false, "Not Implemented yet");
   // if find
-  if(table_names_.find(table_name) != table_names_.end()){
+  if(table_names_.find(table_name) != table_names_.end())
+  {
       table_id_t table_id = table_names_[table_name];
       table_info = tables_[table_id];
       return DB_SUCCESS;
   }
-  else{// not find
-      // LOG(WARNING) << "Can't find the table";
+  else
+  {// not find
       return DB_TABLE_NOT_EXIST;
   }
 }
@@ -225,7 +231,8 @@ dberr_t CatalogManager::GetTable(const string &table_name, TableInfo *&table_inf
  */
 dberr_t CatalogManager::GetTables(vector<TableInfo *> &tables) const {
   // ASSERT(false, "Not Implemented yet");
-  for(auto iter: tables_){
+  for(auto iter: tables_)
+  {
       tables.push_back(iter.second);
   }
   return DB_SUCCESS;
@@ -239,10 +246,12 @@ dberr_t CatalogManager::CreateIndex(const std::string &table_name, const string 
                                     IndexInfo *&index_info, const string &index_type) {
   // ASSERT(false, "Not Implemented yet");
   //if not find the table
-  if(table_names_.find(table_name) == table_names_.end()){
+  if(table_names_.find(table_name) == table_names_.end())
+  {
       return DB_TABLE_NOT_EXIST;
   }// if not find the index
-  else if(index_names_[table_name].find(index_name) != index_names_[table_name].end()){
+  else if(index_names_[table_name].find(index_name) != index_names_[table_name].end())
+  {
       return DB_INDEX_ALREADY_EXIST;
   }
 
@@ -250,12 +259,15 @@ dberr_t CatalogManager::CreateIndex(const std::string &table_name, const string 
   table_id_t table_id = table_names_[table_name];
   TableInfo *table_info = tables_[table_id];
   std::vector<uint32_t> key_map;
-  for(const auto & index_key : index_keys){
+  for(const auto & index_key : index_keys)
+  {
       uint32_t index_id;
-      if(table_info->GetSchema()->GetColumnIndex(index_key, index_id) == DB_SUCCESS){
+      if(table_info->GetSchema()->GetColumnIndex(index_key, index_id) == DB_SUCCESS)
+      {
           key_map.push_back(index_id);
       }
-      else{
+      else
+      {
           return DB_COLUMN_NAME_NOT_EXIST;
       }
   }
@@ -268,8 +280,10 @@ dberr_t CatalogManager::CreateIndex(const std::string &table_name, const string 
 
   //init the index tree
   vector<Field> key_fields;
-  for(auto iter = table_info->GetTableHeap()->Begin(txn); iter != table_info->GetTableHeap()->End(); iter++){
-    for(auto id: key_map){
+  for(auto iter = table_info->GetTableHeap()->Begin(txn); iter != table_info->GetTableHeap()->End(); iter++)
+  {
+    for(auto id: key_map)
+      {
       key_fields.emplace_back(*static_cast<Row>(*iter).GetField(id));
     }
     Row index_row(key_fields);
@@ -300,17 +314,21 @@ dberr_t CatalogManager::CreateIndex(const std::string &table_name, const string 
 dberr_t CatalogManager::GetIndex(const std::string &table_name, const std::string &index_name,
                                  IndexInfo *&index_info) const {
   // ASSERT(false, "Not Implemented yet");
-  if(index_names_.find(table_name) != index_names_.end()){
-      if(index_names_.at(table_name).find(index_name) != index_names_.at(table_name).end()){
+  if(index_names_.find(table_name) != index_names_.end())
+  {
+      if(index_names_.at(table_name).find(index_name) != index_names_.at(table_name).end())
+      {
           index_id_t index_id = index_names_.at(table_name).at(index_name);
           index_info = indexes_.at(index_id);
           return DB_SUCCESS;
       }
-      else{
+      else
+      {
           return DB_INDEX_NOT_FOUND;
       }
   }
-  else{
+  else
+  {
       return DB_TABLE_NOT_EXIST;
   }
 }
@@ -320,8 +338,10 @@ dberr_t CatalogManager::GetIndex(const std::string &table_name, const std::strin
  */
 dberr_t CatalogManager::GetTableIndexes(const std::string &table_name, std::vector<IndexInfo *> &indexes) const {
   // ASSERT(false, "Not Implemented yet");
-  if(index_names_.find(table_name) != index_names_.end()){
-      for(auto iter: index_names_.at(table_name)){
+  if(index_names_.find(table_name) != index_names_.end())
+  {
+      for(auto iter: index_names_.at(table_name))
+      {
           indexes.push_back(indexes_.at(iter.second));
       }
       return DB_SUCCESS;
@@ -335,15 +355,17 @@ dberr_t CatalogManager::GetTableIndexes(const std::string &table_name, std::vect
 dberr_t CatalogManager::DropTable(const string &table_name) {
   // ASSERT(false, "Not Implemented yet");
 
-  if(table_names_.find(table_name) == table_names_.end() || index_names_.find(table_name) == index_names_.end()){
-     // LOG(WARNING) << "DB_TABLE_NOT_EXIST";
+  if(table_names_.find(table_name) == table_names_.end() || index_names_.find(table_name) == index_names_.end())
+  {
       return DB_TABLE_NOT_EXIST;
   }
 
   //drop all indexes in the table
-  while(!index_names_[table_name].empty()){
+  while(!index_names_[table_name].empty())
+  {
       auto iter = index_names_[table_name].begin();
-      if(DropIndex(table_name, iter->first) != DB_SUCCESS){
+      if(DropIndex(table_name, iter->first) != DB_SUCCESS)
+      {
           return DB_FAILED;
       }
   }
@@ -371,12 +393,12 @@ dberr_t CatalogManager::DropTable(const string &table_name) {
  */
 dberr_t CatalogManager::DropIndex(const string &table_name, const string &index_name) {
   // ASSERT(false, "Not Implemented yet");
-  if(index_names_.find(table_name) == index_names_.end()){
-     // LOG(WARNING) << "DB_TABLE_NOT_EXIST";
+  if(index_names_.find(table_name) == index_names_.end())
+  {
       return DB_TABLE_NOT_EXIST;
   }
-  else if (index_names_[table_name].find(index_name) == index_names_[table_name].end()){
-     // LOG(WARNING) << "DB_INDEX_NOT_FOUND";
+  else if (index_names_[table_name].find(index_name) == index_names_[table_name].end())
+  {
       return DB_INDEX_NOT_FOUND;
   }
 
@@ -404,11 +426,13 @@ dberr_t CatalogManager::FlushCatalogMetaPage() const {
   // ASSERT(false, "Not Implemented yet");
   Page *catalog_meta_page = buffer_pool_manager_->FetchPage(CATALOG_META_PAGE_ID);
   buffer_pool_manager_->UnpinPage(CATALOG_META_PAGE_ID, true);
-  if(catalog_meta_page == nullptr){
+  if(catalog_meta_page == nullptr)
+  {
       return DB_FAILED;
   }
   catalog_meta_->SerializeTo(catalog_meta_page->GetData());
-  if(!buffer_pool_manager_->FlushPage(CATALOG_META_PAGE_ID)){
+  if(!buffer_pool_manager_->FlushPage(CATALOG_META_PAGE_ID))
+  {
       return DB_FAILED;
   }
   return DB_SUCCESS;
@@ -425,8 +449,8 @@ dberr_t CatalogManager::LoadTable(const table_id_t table_id, const page_id_t pag
 
   TableMetadata *table_meta_data = nullptr;
   table_meta_data->DeserializeFrom(table_meta_page->GetData(), table_meta_data);
-  if(table_id != table_meta_data->GetTableId()) {
-     // LOG(WARNING) << "Catalog Manager Init Wrong!";
+  if(table_id != table_meta_data->GetTableId())
+  {
       return DB_FAILED;
   }
   TableHeap *table_heap = table_heap->Create(buffer_pool_manager_, table_meta_data->GetFirstPageId(), table_meta_data->GetSchema(),
@@ -448,19 +472,22 @@ dberr_t CatalogManager::LoadIndex(const index_id_t index_id, const page_id_t pag
    buffer_pool_manager_->UnpinPage(page_id, false);
    IndexMetadata *index_meta_data = nullptr;
    index_meta_data->DeserializeFrom(index_meta_page->GetData(), index_meta_data);
-   if(index_id != index_meta_data->GetIndexId()){
-      // LOG(ERROR) << "Catalog Manager Init Wrong!";
+   if(index_id != index_meta_data->GetIndexId())
+   {
        return DB_FAILED;
    }
-   if(tables_.find(index_meta_data->GetTableId()) != tables_.end()){
+   if(tables_.find(index_meta_data->GetTableId()) != tables_.end())
+   {
        auto table = tables_.find(index_meta_data->GetTableId());
        IndexInfo *index_info = index_info->Create();
        index_info->Init(index_meta_data, table->second, buffer_pool_manager_);
 
        //init the index tree
        vector<Field> key_fields;
-       for(auto iter = table->second->GetTableHeap()->Begin(nullptr); iter != table->second->GetTableHeap()->End(); iter++){
-         for(auto id: index_meta_data->GetKeyMapping()){
+       for(auto iter = table->second->GetTableHeap()->Begin(nullptr); iter != table->second->GetTableHeap()->End(); iter++)
+       {
+         for(auto id: index_meta_data->GetKeyMapping())
+          {
            key_fields.emplace_back(*static_cast<Row>(*iter).GetField(id));
          }
          Row index_row(key_fields);
@@ -471,8 +498,8 @@ dberr_t CatalogManager::LoadIndex(const index_id_t index_id, const page_id_t pag
        index_names_[table->second->GetTableName()][index_meta_data->GetIndexName()] = index_id;
        indexes_[index_id] = index_info;
    }
-   else{
-     //  LOG(WARNING) << "Can't find the table_id";
+   else
+   {
        return DB_TABLE_NOT_EXIST;
    }
    return DB_SUCCESS;
@@ -483,12 +510,13 @@ dberr_t CatalogManager::LoadIndex(const index_id_t index_id, const page_id_t pag
  */
 dberr_t CatalogManager::GetTable(const table_id_t table_id, TableInfo *&table_info) {
   // ASSERT(false, "Not Implemented yet");
-  if(tables_.find(table_id) != tables_.end()){
+  if(tables_.find(table_id) != tables_.end())
+   {
       table_info = tables_[table_id];
       return  DB_SUCCESS;
   }
-  else{
-     // LOG(WARNING) << "DB_TABLE_NOT_EXIST";
+  else
+  {
       return DB_TABLE_NOT_EXIST;
   }
 }

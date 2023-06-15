@@ -40,7 +40,8 @@ uint32_t TableMetadata::SerializeTo(char *buf) const {
 uint32_t TableMetadata::GetSerializedSize() const {
     /* the size of TABLE_METADATA_MAGIC_NUM, table_id_, table_name_.length(), table_name_, root_page_id_ and schema_*/
     uint32_t len = table_name_.length() + schema_->GetSerializedSize();
-    for(const auto& iter: primary_key_){
+    for(const auto& iter: primary_key_)
+    {
         len += iter.length();
         len += sizeof(uint32_t);
     }
@@ -50,7 +51,7 @@ uint32_t TableMetadata::GetSerializedSize() const {
 
 uint32_t TableMetadata::DeserializeFrom(char *buf, TableMetadata *&table_meta) {
     if (table_meta != nullptr) {
-      //  LOG(WARNING) << "Pointer object table info is not null in table info deserialize." << std::endl;
+
     }
     char *p = buf;
     // magic num
