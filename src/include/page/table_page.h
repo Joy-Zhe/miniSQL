@@ -28,6 +28,8 @@
 
 class TablePage : public Page {
  public:
+ enum class RetState { ILLEGAL_CALL,
+                        INSUFFICIENT_TABLE_PAGE,DOUBLE_DELETE,SUCCESS };
   void Init(page_id_t page_id, page_id_t prev_id, LogManager *log_mgr, Transaction *txn);
 
   page_id_t GetTablePageId() { return *reinterpret_cast<page_id_t *>(GetData()); }
