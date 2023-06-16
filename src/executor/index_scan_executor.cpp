@@ -5,11 +5,11 @@
 */
 IndexScanExecutor::IndexScanExecutor(ExecuteContext *exec_ctx, const IndexScanPlanNode *plan)
     : AbstractExecutor(exec_ctx), plan_(plan) {}
-
-//static bool CompareRowId(RowId &a, RowId &b){
-//  if(a.GetPageId() < b.GetPageId() || (a.GetPageId() == b.GetPageId() && a.GetSlotNum() < b.GetSlotNum())) return true;
-//  else return false;
-//}
+//static
+bool CompareRowId(RowId &a, RowId &b){
+  if(a.GetPageId() < b.GetPageId() || (a.GetPageId() == b.GetPageId() && a.GetSlotNum() < b.GetSlotNum())) return true;
+  else return false;
+}
 
 void IndexScanExecutor::Init() {
   vector<shared_ptr<AbstractExpression>> plan_ptr;
