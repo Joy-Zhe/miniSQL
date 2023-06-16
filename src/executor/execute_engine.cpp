@@ -17,6 +17,11 @@
 #include "planner/planner.h"
 #include "utils/utils.h"
 
+extern "C" {
+int yyparse(void);
+#include "parser/minisql_lex.h"
+#include "parser/parser.h"
+}//added
 ExecuteEngine::ExecuteEngine() {
   char path[] = "./databases";
   DIR *dir;
