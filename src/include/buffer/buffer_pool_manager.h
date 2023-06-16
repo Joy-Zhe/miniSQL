@@ -47,6 +47,7 @@ class BufferPoolManager {
 
   frame_id_t TryToFindFreePage();
 
+  unordered_map<page_id_t, frame_id_t> GetPageTable(){ return page_table_; }
  private:
   size_t pool_size_;                                 // number of pages in buffer pool
   Page *pages_;                                      // array of pages
