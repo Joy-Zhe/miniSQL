@@ -30,6 +30,17 @@ bool TableIterator::operator!=(const TableIterator &itr) const {
   return !(*this == itr);
 }
 
+TableIterator &TableIterator::operator=(const TableIterator &itr) noexcept {
+  this->table_heap = itr.table_heap;
+  this->txn = itr.txn;
+  //this->row_id_ = itr.row_id_;
+  this->row = new Row(*itr.row);
+//  row_->destroy();
+//  if(row_id_.GetPageId()!=INVALID_PAGE_ID)
+//    table_heap->GetTuple(row,txn);
+  return *this;
+}
+
 const Row &TableIterator::operator*() {
   //  ASSERT(false, "Not implemented yet.");
   ASSERT(*this != table_heap->End(), "TableHeap iterator out of range, invalid dereference.");
